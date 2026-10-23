@@ -78,6 +78,12 @@
       text-align: left; -webkit-user-select: all; user-select: all;
       font-family: ui-monospace, Menlo, Consolas, monospace; }
     .btn.copied { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 8px 24px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.25); }
+    .mini { display: block; width: 100%; text-align: center; margin-top: 10px; padding: 9px 18px; border-radius: 12px;
+      background: #f4f6fb; color: #111; font-weight: 600; font-size: 14px; text-decoration: none;
+      transition: transform .2s ease, background .2s ease; }
+    .mini:hover { background: #fff; transform: translateY(-1px); }
+    .mini:active { transform: scale(.97); }
+    .mini:focus-visible { outline: 3px solid var(--red-soft); outline-offset: 3px; }
     #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
 
     @media (prefers-reduced-motion: reduce) {
@@ -91,11 +97,12 @@
 
   <main class="box">
     <h1>Zymar</h1>
-    <p class="sub">Copia el enlace y ábrelo en una ventana de incógnito</p>
+    <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
 
     <code class="url" id="url"></code>
 
     <button class="btn" id="copy" type="button">Copiar enlace</button>
+    <a class="mini" id="go" href="#">Entrar</a>
     <div id="ok" role="status" aria-live="polite"></div>
   </main>
 
@@ -103,6 +110,7 @@
     var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
     var $ = function (id) { return document.getElementById(id); };
     $('url').textContent = URL_APP;
+    $('go').href = URL_APP;
 
     var timer;
     function done(ok) {
