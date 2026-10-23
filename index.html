@@ -22,6 +22,7 @@
       -webkit-font-smoothing: antialiased; }
     /* Fondo: imagen fija con zoom lento + oscurecido para que se lea el texto */
     .bg { position: fixed; inset: 0; z-index: -2; background: #000 center / cover no-repeat;
+      filter: saturate(1.2) contrast(1.08) brightness(.9);
       animation: drift 28s ease-in-out infinite alternate; transform-origin: center; }
     .bg::after { content: ""; position: absolute; inset: 0;
       background:
@@ -34,6 +35,9 @@
       background: radial-gradient(circle, rgba(225,29,46,.35), transparent 65%);
       filter: blur(40px); animation: pulse 5s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { opacity: .45; transform: scale(.92); } 50% { opacity: .9; transform: scale(1.08); } }
+    #dots { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
     body { display: flex; align-items: center; justify-content: center; text-align: center;
       padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); }
     /* Tarjeta de vidrio */
@@ -83,6 +87,8 @@
 <body>
   <div class="bg" aria-hidden="true"></div>
   <div class="glow" aria-hidden="true"></div>
+  <canvas id="dots" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
   <main class="box">
     <h1>Zymar</h1>
     <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
@@ -134,6 +140,70 @@
         img.src = u;
       }
       probar();
+    })();
+
+    // Puntos animados sobre el fondo (ligero: sin librerías, no usa ancho de banda extra)
+    (function () {
+      var c = document.getElementById('dots'), x = c.getContext('2d');
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var W, H, P = [], LINK, mx = -9999, my = -9999, raf = 0, t = 0;
+
+      function size() {
+        W = window.innerWidth; H = window.innerHeight;
+        c.width = W * dpr; c.height = H * dpr;
+        c.style.width = W + 'px'; c.style.height = H + 'px';
+        x.setTransform(dpr, 0, 0, dpr, 0, 0);
+        LINK = W < 600 ? 90 : 130;
+        var n = Math.min(110, Math.round(W * H / 15000));
+        while (P.length < n) P.push({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
+          r: .8 + Math.random() * 1.6, red: Math.random() < .18, ph: Math.random() * 6.28
+        });
+        P.length = n;
+      }
+
+      function frame() {
+        t += .02;
+        x.clearRect(0, 0, W, H);
+        var i, j, a, b, dx, dy, d, al;
+        for (i = 0; i < P.length; i++) {
+          a = P[i];
+          if (!reduce) {
+            a.x += a.vx; a.y += a.vy;
+            if (a.x < -10) a.x = W + 10; else if (a.x > W + 10) a.x = -10;
+            if (a.y < -10) a.y = H + 10; else if (a.y > H + 10) a.y = -10;
+          }
+          for (j = i + 1; j < P.length; j++) {
+            b = P[j]; dx = a.x - b.x; dy = a.y - b.y; d = Math.sqrt(dx * dx + dy * dy);
+            if (d < LINK) {
+              al = (1 - d / LINK) * .22;
+              x.strokeStyle = 'rgba(255,255,255,' + al + ')';
+              x.lineWidth = .7; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
+            }
+          }
+          dx = a.x - mx; dy = a.y - my; d = Math.sqrt(dx * dx + dy * dy);
+          if (d < LINK + 40) {
+            al = (1 - d / (LINK + 40)) * .55;
+            x.strokeStyle = 'rgba(255,90,103,' + al + ')';
+            x.lineWidth = .9; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(mx, my); x.stroke();
+          }
+          al = .45 + .4 * Math.sin(t + a.ph);
+          x.fillStyle = a.red ? 'rgba(255,90,103,' + al + ')' : 'rgba(255,255,255,' + al + ')';
+          x.beginPath(); x.arc(a.x, a.y, a.r, 0, 6.2832); x.fill();
+        }
+        if (!reduce) raf = requestAnimationFrame(frame);
+      }
+
+      function start() { cancelAnimationFrame(raf); frame(); }
+      size(); start();
+      window.addEventListener('resize', function () { size(); if (reduce) frame(); });
+      window.addEventListener('pointermove', function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
+      window.addEventListener('pointerleave', function () { mx = my = -9999; });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) cancelAnimationFrame(raf); else if (!reduce) start();
+      });
     })();
   </script>
 </body>
