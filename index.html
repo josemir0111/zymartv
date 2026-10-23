@@ -54,7 +54,7 @@
       -webkit-background-clip: text; background-clip: text; color: transparent;
       filter: drop-shadow(0 4px 18px rgba(225,29,46,.45)); }
     .sub { color: var(--text); font-size: 17px; font-weight: 500; line-height: 1.4; margin: 0 0 22px; }
-    .btn { position: relative; overflow: hidden; display: block; width: 100%; color: #fff;
+    .btn { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; color: #fff;
       background: linear-gradient(135deg, #f0283a, #b8101f); padding: 17px 18px; border-radius: 14px;
       text-decoration: none; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 18px;
       letter-spacing: .01em; border: 0; cursor: pointer;
@@ -72,15 +72,28 @@
       text-align: left; -webkit-user-select: all; user-select: all;
       font-family: ui-monospace, Menlo, Consolas, monospace; }
     .btn.copied { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 8px 24px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.25); }
-    .mini { display: block; width: 100%; text-align: center; margin-top: 10px; padding: 9px 18px; border-radius: 12px;
+    .mini { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; padding: 9px 18px; border-radius: 12px;
       background: #f4f6fb; color: #111; font-weight: 600; font-size: 14px; text-decoration: none;
       transition: transform .2s ease, background .2s ease; }
     .mini:hover { background: #fff; transform: translateY(-1px); }
     .mini:active { transform: scale(.97); }
     .mini:focus-visible { outline: 3px solid var(--red-soft); outline-offset: 3px; }
+    .ic { flex: none; }
+    .ic-check { display: none; }
+    .btn.copied .ic-copy { display: none; }
+    .btn.copied .ic-check { display: block; animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+    .mini .ic { transition: transform .25s ease; }
+    .mini:hover .ic { transform: translateX(4px); }
+    .mini { box-shadow: 0 4px 14px rgba(255,255,255,.12); }
+    .mini:hover { box-shadow: 0 6px 20px rgba(255,255,255,.28); }
+    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); pointer-events: none;
+      transform: scale(0); animation: rip .65s ease-out forwards; }
+    .mini .ripple { background: rgba(225,29,46,.3); }
+    @keyframes rip { to { transform: scale(1); opacity: 0; } }
     #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) {
-      .bg, .glow, .box, .btn::after { animation: none; }
+      .bg, .glow, .box, .btn::after, .ripple { animation: none; }
     }
   </style>
 </head>
@@ -93,8 +106,12 @@
     <h1>Zymar</h1>
     <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
     <code class="url" id="url"></code>
-    <button class="btn" id="copy" type="button">Copiar enlace</button>
-    <a class="mini" id="go" href="#">Entrar</a>
+    <button class="btn" id="copy" type="button">
+      <svg class="ic ic-copy" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+      <svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      <span id="ctxt">Copiar enlace</span>
+    </button>
+    <a class="mini" id="go" href="#"><span>Entrar</span><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <div id="ok" role="status" aria-live="polite"></div>
   </main>
   <script>
@@ -105,10 +122,10 @@
     var timer;
     function done(ok) {
       var b = $('copy');
-      b.textContent = ok ? '¡Enlace copiado!' : 'Mantén presionado el enlace para copiarlo';
+      $('ctxt').textContent = ok ? '¡Enlace copiado!' : 'Mantén presionado el enlace para copiarlo';
       if (ok) b.classList.add('copied');
       clearTimeout(timer);
-      timer = setTimeout(function () { b.textContent = 'Copiar enlace'; b.classList.remove('copied'); }, 2500);
+      timer = setTimeout(function () { $('ctxt').textContent = 'Copiar enlace'; b.classList.remove('copied'); }, 2500);
     }
     function fallback() {
       var t = document.createElement('textarea');
@@ -123,6 +140,16 @@
         navigator.clipboard.writeText(URL_APP).then(function () { done(true); }, fallback);
       } else { fallback(); }
     });
+    // Efecto de onda al tocar los botones
+    function ripple(e) {
+      var el = e.currentTarget, r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, o = document.createElement('span');
+      o.className = 'ripple'; o.style.width = o.style.height = d + 'px';
+      o.style.left = (e.clientX - r.left - d / 2) + 'px'; o.style.top = (e.clientY - r.top - d / 2) + 'px';
+      el.appendChild(o); setTimeout(function () { o.remove(); }, 700);
+    }
+    $('copy').addEventListener('pointerdown', ripple);
+    $('go').addEventListener('pointerdown', ripple);
+
     // Fondo de pantalla (Dropbox). Si el primer enlace falla, prueba el enlace directo.
     (function () {
       var base = 'https://www.dropbox.com/scl/fi/16lbymfscgsze7lbgp7nc/ChatGPT-Image-13-sept-2026-09_37_47-p.m..png?rlkey=cw8iog21icw665a1b0tjtv101&st=4fykjltk';
