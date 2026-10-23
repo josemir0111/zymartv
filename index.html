@@ -5,9 +5,6 @@
   <title>Zymar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,7 +20,6 @@
     html, body { height: 100%; margin: 0; color: var(--text);
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       -webkit-font-smoothing: antialiased; }
-
     /* Fondo: imagen fija con zoom lento + oscurecido para que se lea el texto */
     .bg { position: fixed; inset: 0; z-index: -2; background: #000 center / cover no-repeat;
       animation: drift 28s ease-in-out infinite alternate; transform-origin: center; }
@@ -32,17 +28,14 @@
         radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.15) 0%, rgba(0,0,0,.65) 100%),
         linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.7)); }
     @keyframes drift { from { transform: scale(1); } to { transform: scale(1.08); } }
-
     /* Brillo rojo que respira detrás de la tarjeta */
     .glow { position: fixed; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px;
       z-index: -1; border-radius: 50%; pointer-events: none;
       background: radial-gradient(circle, rgba(225,29,46,.35), transparent 65%);
       filter: blur(40px); animation: pulse 5s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { opacity: .45; transform: scale(.92); } 50% { opacity: .9; transform: scale(1.08); } }
-
     body { display: flex; align-items: center; justify-content: center; text-align: center;
       padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); }
-
     /* Tarjeta de vidrio */
     .box { width: 100%; max-width: 400px; padding: 32px 24px 26px; border-radius: 22px;
       background: rgba(10,10,14,.5);
@@ -51,14 +44,12 @@
       box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(225,29,46,.12), inset 0 1px 0 rgba(255,255,255,.12);
       animation: enter .9s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes enter { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
-
     h1 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 46px;
       letter-spacing: -.02em; line-height: 1; margin: 0 0 10px;
       background: linear-gradient(180deg, #ffffff 30%, #ffb3ba 100%);
       -webkit-background-clip: text; background-clip: text; color: transparent;
       filter: drop-shadow(0 4px 18px rgba(225,29,46,.45)); }
     .sub { color: var(--text); font-size: 17px; font-weight: 500; line-height: 1.4; margin: 0 0 22px; }
-
     .btn { position: relative; overflow: hidden; display: block; width: 100%; color: #fff;
       background: linear-gradient(135deg, #f0283a, #b8101f); padding: 17px 18px; border-radius: 14px;
       text-decoration: none; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 18px;
@@ -72,7 +63,6 @@
     .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(225,29,46,.6), inset 0 1px 0 rgba(255,255,255,.3); }
     .btn:active { transform: scale(.98); }
     .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-
     .url { display: block; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16);
       background: rgba(0,0,0,.45); color: var(--text); font-size: 12px; margin-bottom: 14px; line-height: 1.45; word-break: break-all;
       text-align: left; -webkit-user-select: all; user-select: all;
@@ -85,7 +75,6 @@
     .mini:active { transform: scale(.97); }
     .mini:focus-visible { outline: 3px solid var(--red-soft); outline-offset: 3px; }
     #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
-
     @media (prefers-reduced-motion: reduce) {
       .bg, .glow, .box, .btn::after { animation: none; }
     }
@@ -94,24 +83,19 @@
 <body>
   <div class="bg" aria-hidden="true"></div>
   <div class="glow" aria-hidden="true"></div>
-
   <main class="box">
     <h1>Zymar</h1>
     <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
-
     <code class="url" id="url"></code>
-
     <button class="btn" id="copy" type="button">Copiar enlace</button>
     <a class="mini" id="go" href="#">Entrar</a>
     <div id="ok" role="status" aria-live="polite"></div>
   </main>
-
   <script>
     var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
     var $ = function (id) { return document.getElementById(id); };
     $('url').textContent = URL_APP;
     $('go').href = URL_APP;
-
     var timer;
     function done(ok) {
       var b = $('copy');
@@ -133,7 +117,6 @@
         navigator.clipboard.writeText(URL_APP).then(function () { done(true); }, fallback);
       } else { fallback(); }
     });
-
     // Fondo de pantalla (Dropbox). Si el primer enlace falla, prueba el enlace directo.
     (function () {
       var base = 'https://www.dropbox.com/scl/fi/16lbymfscgsze7lbgp7nc/ChatGPT-Image-13-sept-2026-09_37_47-p.m..png?rlkey=cw8iog21icw665a1b0tjtv101&st=4fykjltk';
