@@ -3,13 +3,7 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
-        { "key": "Pragma", "value": "no-cache" },
-        { "key": "Expires", "value": "0" },
-        { "key": "Surrogate-Control", "value": "no-store" },
-        { "key": "CDN-Cache-Control", "value": "no-store" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" },
-        { "key": "Clear-Site-Data", "value": "\"cache\"" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" },
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
