@@ -157,16 +157,11 @@
     </section>
   </main>
   <script>
-    // La URL se lee de config.json (mismo directorio que esta página). Para cambiarla, edita solo ese archivo.
-    // Si config.json no se puede cargar (por ejemplo, al abrir el archivo localmente), se usa este enlace de respaldo.
+    // Para cambiar el enlace, edita solo esta línea.
     var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
     var $ = function (id) { return document.getElementById(id); };
-    function aplicar() { $('url').textContent = URL_APP; $('enter').href = URL_APP; }
-    aplicar();
-    fetch('config.json', { cache: 'no-store' })
-      .then(function (r) { return r.json(); })
-      .then(function (c) { if (c && c.url) { URL_APP = c.url; aplicar(); } })
-      .catch(function () {});
+    $('url').textContent = URL_APP;
+    $('enter').href = URL_APP;
     var timer;
     function done(ok) {
       var b = $('copy');
