@@ -158,16 +158,15 @@
   </main>
   <script>
     // La URL se lee de config.json (mismo directorio que esta página). Para cambiarla, edita solo ese archivo.
-    var URL_APP = '';
+    // Si config.json no se puede cargar (por ejemplo, al abrir el archivo localmente), se usa este enlace de respaldo.
+    var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
     var $ = function (id) { return document.getElementById(id); };
+    function aplicar() { $('url').textContent = URL_APP; $('enter').href = URL_APP; }
+    aplicar();
     fetch('config.json', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
-      .then(function (c) {
-        URL_APP = (c && c.url) || '';
-        $('url').textContent = URL_APP || 'Enlace no disponible por ahora';
-        if (URL_APP) $('enter').href = URL_APP;
-      })
-      .catch(function () { $('url').textContent = 'Enlace no disponible por ahora'; });
+      .then(function (c) { if (c && c.url) { URL_APP = c.url; aplicar(); } })
+      .catch(function () {});
     var timer;
     function done(ok) {
       var b = $('copy');
