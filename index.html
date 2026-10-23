@@ -2,287 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Zymar | Streaming</title>
+  <title>Zymar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Zymar: plataforma de streaming. Disfruta tu contenido en cualquier dispositivo.">
   <meta name="theme-color" content="#0b0f1a">
-  <meta name="color-scheme" content="dark">
-
-  <!-- Sin caché -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-
-  <!-- App móvil (PWA) -->
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/icon.svg">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Zymar">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Zymar | Streaming">
-  <meta property="og:description" content="Plataforma de streaming Zymar.">
-  <meta property="og:type" content="website">
-
-  <link rel="preconnect" href="https://script.google.com">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  <!-- Redirección (respaldo si JavaScript está desactivado) -->
+  <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec">
   <style>
-    :root {
-      --bg: #0b0f1a;
-      --bg-2: #121829;
-      --line: rgba(255,255,255,.08);
-      --text: #eef1f8;
-      --muted: #9aa4bd;
-      --accent: #7c5cff;
-      --accent-2: #22d3ee;
-      --header-h: 56px;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; background: var(--bg); color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
-    body { display: flex; flex-direction: column; height: 100dvh; }
-
-    /* Header */
-    header {
-      flex: 0 0 auto; height: calc(var(--header-h) + var(--safe-top)); padding-top: var(--safe-top);
-      display: flex; align-items: center; justify-content: space-between;
-      padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
-      background: linear-gradient(180deg, rgba(18,24,41,.98), rgba(11,15,26,.98));
-      border-bottom: 1px solid var(--line); z-index: 20;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-    .brand svg { width: 32px; height: 32px; }
-    .brand span { font-weight: 700; font-size: 18px; letter-spacing: .2px; }
-    .brand small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: .6px; text-transform: uppercase; margin-top: -2px; }
-    .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
-    .live i { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 0 0 rgba(239,68,68,.6); animation: pulse 1.8s infinite; }
-    .actions { display: flex; align-items: center; gap: 8px; }
-    .btn {
-      appearance: none; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text);
-      height: 38px; min-width: 38px; padding: 0 12px; border-radius: 10px; font: inherit; font-size: 13px; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background .2s, transform .1s;
-    }
-    .btn:hover { background: rgba(255,255,255,.09); }
-    .btn:active { transform: scale(.96); }
-    .btn.primary { background: linear-gradient(135deg, var(--accent), #5b8cff); border-color: transparent; }
-    .btn svg { width: 18px; height: 18px; }
-    .btn[hidden] { display: none; }
-
-    /* Contenedor de la app */
-    main { position: relative; flex: 1 1 auto; min-height: 0; background: var(--bg); }
-    iframe#app {
-      position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff;
-      opacity: 0; transition: opacity .4s ease;
-      padding-bottom: var(--safe-bottom);
-    }
-    iframe#app.ready { opacity: 1; }
-
-    /* Splash / carga */
-    #splash {
-      position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
-      background: radial-gradient(1200px 600px at 50% -10%, rgba(124,92,255,.22), transparent 60%), var(--bg);
-      transition: opacity .45s ease, visibility .45s;
-    }
-    #splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
-    .logo-big { width: 84px; height: 84px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 10px 30px rgba(124,92,255,.5)); }
-    .splash-title { font-size: 26px; font-weight: 700; letter-spacing: .5px; }
-    .splash-sub { color: var(--muted); font-size: 14px; margin-top: -14px; }
-    .bar { width: min(220px, 60vw); height: 4px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
-    .bar::after { content: ''; display: block; height: 100%; width: 40%; border-radius: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2)); animation: load 1.2s infinite ease-in-out; }
-
-    /* Estado de error / sin conexión */
-    #error {
-      position: absolute; inset: 0; z-index: 11; display: none; flex-direction: column; align-items: center; justify-content: center;
-      gap: 14px; padding: 24px; text-align: center; background: var(--bg);
-    }
-    #error.show { display: flex; }
-    #error h2 { font-size: 20px; }
-    #error p { color: var(--muted); font-size: 14px; max-width: 360px; line-height: 1.5; }
-    #error .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
-
-    /* Banner de instalación */
-    #install {
-      position: fixed; left: 12px; right: 12px; bottom: calc(12px + var(--safe-bottom)); z-index: 30;
-      display: none; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px;
-      background: rgba(18,24,41,.96); border: 1px solid var(--line); box-shadow: 0 12px 40px rgba(0,0,0,.5);
-      backdrop-filter: blur(12px); max-width: 480px; margin: 0 auto;
-    }
-    #install.show { display: flex; animation: up .35s ease; }
-    #install svg.ic { width: 36px; height: 36px; flex: none; }
-    #install .t { flex: 1; font-size: 13px; line-height: 1.35; }
-    #install .t b { display: block; font-size: 14px; }
-    #install .t span { color: var(--muted); }
-
-    /* Aviso sin conexión */
-    #offline { display: none; background: #7f1d1d; color: #fff; font-size: 12px; font-weight: 600; text-align: center; padding: 6px; }
-    #offline.show { display: block; }
-
-    @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
-    @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
-    @keyframes float { 50% { transform: translateY(-8px); } }
-    @keyframes up { from { transform: translateY(20px); opacity: 0; } }
-
-    @media (max-width: 480px) {
-      .live span { display: none; }
-      .btn .lbl { display: none; }
-    }
-    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+    html, body { height: 100%; margin: 0; background: #0b0f1a; color: #eef1f8;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    body { display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+    .box { max-width: 320px; }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    p { color: #9aa4bd; font-size: 14px; margin: 0 0 22px; }
+    .bar { width: 200px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); margin: 0 auto 22px; overflow: hidden; }
+    .bar::after { content: ''; display: block; height: 100%; width: 40%; background: linear-gradient(90deg, #7c5cff, #22d3ee); animation: l 1.1s infinite ease-in-out; }
+    a { color: #fff; background: #7c5cff; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; }
+    @keyframes l { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
   </style>
 </head>
 <body>
-
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/>
-      </linearGradient>
-      <symbol id="logo" viewBox="0 0 64 64">
-        <rect width="64" height="64" rx="16" fill="url(#g)"/>
-        <path d="M18 20h28l-20 24h20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-      </symbol>
-    </defs>
-  </svg>
-
-  <header>
-    <a class="brand" href="/" aria-label="Zymar inicio">
-      <svg><use href="#logo"/></svg>
-      <div><span>Zymar</span><small>Streaming</small></div>
-    </a>
-    <div class="actions">
-      <div class="live"><i></i><span>EN VIVO</span></div>
-      <button class="btn" id="btnReload" aria-label="Recargar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
-        <span class="lbl">Recargar</span>
-      </button>
-      <button class="btn" id="btnFull" aria-label="Pantalla completa">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-      </button>
-      <button class="btn primary" id="btnInstallTop" hidden>Instalar</button>
-    </div>
-  </header>
-
-  <div id="offline" role="status">Sin conexión a internet</div>
-
-  <main>
-    <div id="splash">
-      <svg class="logo-big"><use href="#logo"/></svg>
-      <div class="splash-title">Zymar</div>
-      <div class="splash-sub">Preparando tu experiencia…</div>
-      <div class="bar"></div>
-    </div>
-
-    <div id="error" role="alert">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <h2>No pudimos cargar el contenido</h2>
-      <p>Revisa tu conexión e inténtalo de nuevo. Si el problema continúa, abre la plataforma directamente.</p>
-      <div class="row">
-        <button class="btn primary" id="btnRetry">Reintentar</button>
-        <a class="btn" id="btnDirect" target="_blank" rel="noopener">Abrir directo</a>
-      </div>
-    </div>
-
-    <iframe id="app" title="Zymar Streaming"
-      allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; web-share; accelerometer; gyroscope"
-      allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-  </main>
-
-  <div id="install" role="dialog" aria-label="Instalar app">
-    <svg class="ic"><use href="#logo"/></svg>
-    <div class="t"><b>Instala Zymar</b><span>Acceso rápido desde tu pantalla de inicio</span></div>
-    <button class="btn primary" id="btnInstall">Instalar</button>
-    <button class="btn" id="btnClose" aria-label="Cerrar">✕</button>
+  <div class="box">
+    <h1>Zymar</h1>
+    <p>Abriendo la plataforma…</p>
+    <div class="bar"></div>
+    <a id="go" href="https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec">Entrar ahora</a>
   </div>
-
   <script>
-    (function () {
-      'use strict';
-
-      // URL del Google Apps Script (Web App)
-      var APP_URL = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
-      var TIMEOUT_MS = 20000;
-
-      var $ = function (id) { return document.getElementById(id); };
-      var frame = $('app'), splash = $('splash'), errBox = $('error');
-      var timer;
-
-      // Evita caché: parámetro único en cada carga
-      function freshUrl() {
-        var sep = APP_URL.indexOf('?') > -1 ? '&' : '?';
-        return APP_URL + sep + '_ts=' + Date.now();
-      }
-
-      function showSplash() { splash.classList.remove('hide'); errBox.classList.remove('show'); frame.classList.remove('ready'); }
-      function showReady() { clearTimeout(timer); splash.classList.add('hide'); errBox.classList.remove('show'); frame.classList.add('ready'); }
-      function showError() { clearTimeout(timer); splash.classList.add('hide'); errBox.classList.add('show'); }
-
-      function load() {
-        showSplash();
-        clearTimeout(timer);
-        timer = setTimeout(showError, TIMEOUT_MS);
-        frame.src = freshUrl();
-      }
-
-      frame.addEventListener('load', function () { if (frame.src && frame.src !== 'about:blank') showReady(); });
-      $('btnReload').addEventListener('click', load);
-      $('btnRetry').addEventListener('click', load);
-      $('btnDirect').href = APP_URL;
-
-      // Pantalla completa
-      $('btnFull').addEventListener('click', function () {
-        var el = document.documentElement;
-        if (!document.fullscreenElement) { (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el); }
-        else { (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document); }
-      });
-
-      // Conexión
-      function net() { $('offline').classList.toggle('show', !navigator.onLine); }
-      window.addEventListener('online', function () { net(); load(); });
-      window.addEventListener('offline', net);
-      net();
-
-      // Instalación PWA
-      var deferred;
-      window.addEventListener('beforeinstallprompt', function (e) {
-        e.preventDefault(); deferred = e;
-        $('btnInstallTop').hidden = false;
-        if (!sessionStorage.getItem('zy-dismiss')) $('install').classList.add('show');
-      });
-      function doInstall() {
-        if (!deferred) return;
-        deferred.prompt();
-        deferred.userChoice.finally(function () { deferred = null; $('install').classList.remove('show'); $('btnInstallTop').hidden = true; });
-      }
-      $('btnInstall').addEventListener('click', doInstall);
-      $('btnInstallTop').addEventListener('click', doInstall);
-      $('btnClose').addEventListener('click', function () {
-        $('install').classList.remove('show');
-        try { sessionStorage.setItem('zy-dismiss', '1'); } catch (e) {}
-      });
-      window.addEventListener('appinstalled', function () { $('install').classList.remove('show'); $('btnInstallTop').hidden = true; });
-
-      // Al volver a la app tras mucho tiempo, recargar contenido fresco
-      var hiddenAt = 0;
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) { hiddenAt = Date.now(); }
-        else if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) { load(); }
-      });
-
-      // Service worker sin caché
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function () {});
-      }
-
-      load();
-    })();
+    // Cambia esta URL si tu enlace de Apps Script cambia
+    var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
+    document.getElementById('go').href = URL_APP;
+    window.location.replace(URL_APP);
   </script>
 </body>
 </html>
