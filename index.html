@@ -157,10 +157,17 @@
     </section>
   </main>
   <script>
-    var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
+    // La URL se lee de config.json (mismo directorio que esta página). Para cambiarla, edita solo ese archivo.
+    var URL_APP = '';
     var $ = function (id) { return document.getElementById(id); };
-    $('url').textContent = URL_APP;
-    $('enter').href = URL_APP;
+    fetch('config.json', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (c) {
+        URL_APP = (c && c.url) || '';
+        $('url').textContent = URL_APP || 'Enlace no disponible por ahora';
+        if (URL_APP) $('enter').href = URL_APP;
+      })
+      .catch(function () { $('url').textContent = 'Enlace no disponible por ahora'; });
     var timer;
     function done(ok) {
       var b = $('copy');
@@ -178,6 +185,7 @@
       done(ok);
     }
     $('copy').addEventListener('click', function () {
+      if (!URL_APP) return;
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(URL_APP).then(function () { done(true); }, fallback);
       } else { fallback(); }
