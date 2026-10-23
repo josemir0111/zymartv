@@ -1,0 +1,17 @@
+{
+  "name": "Zymar Streaming",
+  "short_name": "Zymar",
+  "description": "Plataforma de streaming Zymar",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f1a",
+  "theme_color": "#0b0f1a",
+  "lang": "es",
+  "categories": ["entertainment", "video"],
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
