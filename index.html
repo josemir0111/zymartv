@@ -54,6 +54,7 @@
       -webkit-background-clip: text; background-clip: text; color: transparent;
       filter: drop-shadow(0 4px 18px rgba(225,29,46,.45)); }
     .sub { color: var(--text); font-size: 17px; font-weight: 500; line-height: 1.4; margin: 0 0 22px; }
+
     .btn { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; color: #fff;
       background: linear-gradient(135deg, #f0283a, #b8101f); padding: 17px 18px; border-radius: 14px;
       text-decoration: none; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 18px;
@@ -63,7 +64,6 @@
     .btn::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
       background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
       transform: skewX(-20deg); animation: shine 3.8s ease-in-out infinite; }
-    @keyframes shine { 0%,55% { left: -80%; } 100% { left: 140%; } }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(225,29,46,.6), inset 0 1px 0 rgba(255,255,255,.3); }
     .btn:active { transform: scale(.98); }
     .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
@@ -72,28 +72,58 @@
       text-align: left; -webkit-user-select: all; user-select: all;
       font-family: ui-monospace, Menlo, Consolas, monospace; }
     .btn.copied { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 8px 24px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.25); }
-    .mini { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; padding: 9px 18px; border-radius: 12px;
-      background: #f4f6fb; color: #111; font-weight: 600; font-size: 14px; text-decoration: none;
-      transition: transform .2s ease, background .2s ease; }
-    .mini:hover { background: #fff; transform: translateY(-1px); }
-    .mini:active { transform: scale(.97); }
-    .mini:focus-visible { outline: 3px solid var(--red-soft); outline-offset: 3px; }
     .ic { flex: none; }
     .ic-check { display: none; }
     .btn.copied .ic-copy { display: none; }
     .btn.copied .ic-check { display: block; animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
     @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
-    .mini .ic { transition: transform .25s ease; }
-    .mini:hover .ic { transform: translateX(4px); }
-    .mini { box-shadow: 0 4px 14px rgba(255,255,255,.12); }
-    .mini:hover { box-shadow: 0 6px 20px rgba(255,255,255,.28); }
     .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); pointer-events: none;
       transform: scale(0); animation: rip .65s ease-out forwards; }
-    .mini .ripple { background: rgba(225,29,46,.3); }
     @keyframes rip { to { transform: scale(1); opacity: 0; } }
     #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
+
+    /* Entrar: opción secundaria */
+    .or { margin: 14px 0 10px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+    .btn-alt { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.28); box-shadow: none;
+      padding: 13px 18px; font-size: 16px; }
+    .btn-alt::after { display: none; }
+    .btn-alt:hover { background: rgba(255,255,255,.14); border-color: var(--red-soft); box-shadow: 0 8px 24px rgba(225,29,46,.25); }
+
+    /* Anuncio: sígueme en todas mis redes */
+    .promo { position: relative; margin-top: 18px; padding: 16px 12px 14px; border-radius: 16px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(225,29,46,.28), rgba(10,10,14,.65) 70%);
+      border: 1px solid rgba(255,90,103,.45);
+      box-shadow: 0 14px 40px rgba(225,29,46,.28), inset 0 1px 0 rgba(255,255,255,.16);
+      animation: promoIn .9s .25s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes promoIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+    .promo::before { content: ""; position: absolute; top: 0; left: -90%; width: 55%; height: 100%;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent);
+      transform: skewX(-20deg); animation: shine 4.2s ease-in-out infinite; pointer-events: none; }
+    @keyframes shine { 0%,55% { left: -90%; } 100% { left: 150%; } }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
+      font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff; background: linear-gradient(135deg, #f0283a, #b8101f);
+      box-shadow: 0 4px 14px rgba(225,29,46,.55); }
+    .badge i { width: 7px; height: 7px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .25; transform: scale(.7); } }
+    .promo-t { margin: 9px 0 4px; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; font-size: clamp(12px, 3.5vw, 15px);
+      line-height: 1.2; letter-spacing: -.01em;
+      background: linear-gradient(180deg, #ffffff 35%, #ffc2c8 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .promo-s { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+    .social { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+    .social:empty { display: none; }
+    .net { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 600; color: #fff; text-decoration: none;
+      background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.25);
+      transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+    .net svg { flex: none; }
+    .net:hover { background: linear-gradient(135deg, #f0283a, #b8101f); border-color: transparent;
+      transform: translateY(-3px); box-shadow: 0 10px 24px rgba(225,29,46,.5); }
+    .net:active { transform: scale(.97); }
+    .net:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
     @media (prefers-reduced-motion: reduce) {
-      .bg, .glow, .box, .btn::after, .ripple { animation: none; }
+      .bg, .glow, .box, .promo, .promo::before, .badge i { animation: none; }
     }
   </style>
 </head>
@@ -111,14 +141,26 @@
       <svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       <span id="ctxt">Copiar enlace</span>
     </button>
-    <a class="mini" id="go" href="#"><span>Entrar</span><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <div id="ok" role="status" aria-live="polite"></div>
+
+    <p class="or">o si prefieres, también puedes</p>
+    <a class="btn btn-alt" id="enter" href="#" target="_blank" rel="noopener noreferrer">
+      <span>Entrar</span>
+      <svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+
+    <section class="promo" aria-label="Redes sociales">
+      <span class="badge"><i></i>Únete a la comunidad</span>
+      <h2 class="promo-t">Sígueme en todas mis redes sociales</h2>
+      <p class="promo-s">No te pierdas nada: novedades, contenido nuevo y mucho más.</p>
+      <div class="social" id="social"></div>
+    </section>
   </main>
   <script>
     var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
     var $ = function (id) { return document.getElementById(id); };
     $('url').textContent = URL_APP;
-    $('go').href = URL_APP;
+    $('enter').href = URL_APP;
     var timer;
     function done(ok) {
       var b = $('copy');
@@ -148,7 +190,29 @@
       el.appendChild(o); setTimeout(function () { o.remove(); }, 700);
     }
     $('copy').addEventListener('pointerdown', ripple);
-    $('go').addEventListener('pointerdown', ripple);
+    $('enter').addEventListener('pointerdown', ripple);
+
+    // Redes sociales: pega tu enlace entre las comillas de cada red. Las que dejes vacías no se muestran.
+    var ICONS = {
+      Instagram: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
+      TikTok: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2 4.2 5 4.5"/></svg>',
+      YouTube: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor" stroke="none"/></svg>',
+      Facebook: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg>'
+    };
+    var SOCIAL = [
+      { n: 'Instagram', u: '' },
+      { n: 'TikTok',    u: '' },
+      { n: 'YouTube',   u: '' },
+      { n: 'Facebook',  u: '' }
+    ];
+    SOCIAL.forEach(function (r) {
+      if (!r.u) return;
+      var a = document.createElement('a');
+      a.className = 'net'; a.href = r.u; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.innerHTML = (ICONS[r.n] || '') + '<span></span>';
+      a.lastChild.textContent = r.n;
+      $('social').appendChild(a);
+    });
 
     // Fondo de pantalla (Dropbox). Si el primer enlace falla, prueba el enlace directo.
     (function () {
