@@ -1,303 +1,97 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <title>Zymar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --red: #e11d2e;
-      --red-soft: #ff5a67;
-      --text: #f4f6fb;
-      --muted: #b4b8c4;
-    }
-    * { box-sizing: border-box; }
-    html { background: #000; }
-    html, body { height: 100%; margin: 0; color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      -webkit-font-smoothing: antialiased; }
-    /* Fondo: imagen fija con zoom lento + oscurecido para que se lea el texto */
-    .bg { position: fixed; inset: 0; z-index: -2; background: #000 center / cover no-repeat;
-      filter: saturate(1.2) contrast(1.08) brightness(.9);
-      animation: drift 28s ease-in-out infinite alternate; transform-origin: center; }
-    .bg::after { content: ""; position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.15) 0%, rgba(0,0,0,.65) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.7)); }
-    @keyframes drift { from { transform: scale(1); } to { transform: scale(1.08); } }
-    /* Brillo rojo que respira detrás de la tarjeta */
-    .glow { position: fixed; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px;
-      z-index: -1; border-radius: 50%; pointer-events: none;
-      background: radial-gradient(circle, rgba(225,29,46,.35), transparent 65%);
-      filter: blur(40px); animation: pulse 5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: .45; transform: scale(.92); } 50% { opacity: .9; transform: scale(1.08); } }
-    #dots { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-    .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-    body { display: flex; align-items: center; justify-content: center; text-align: center;
-      padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); }
-    /* Tarjeta de vidrio */
-    .box { width: 100%; max-width: 400px; padding: 32px 24px 26px; border-radius: 22px;
-      background: rgba(10,10,14,.5);
-      -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(225,29,46,.12), inset 0 1px 0 rgba(255,255,255,.12);
-      animation: enter .9s cubic-bezier(.2,.8,.2,1) both; }
-    @keyframes enter { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
-    h1 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 46px;
-      letter-spacing: -.02em; line-height: 1; margin: 0 0 10px;
-      background: linear-gradient(180deg, #ffffff 30%, #ffb3ba 100%);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      filter: drop-shadow(0 4px 18px rgba(225,29,46,.45)); }
-    .sub { color: var(--text); font-size: 17px; font-weight: 500; line-height: 1.4; margin: 0 0 22px; }
+/**
+ * Contador de visitantes ÚNICOS con país — Zymar
+ *
+ * Uso: crea una Hoja de cálculo de Google nueva → Extensiones → Apps Script →
+ * pega este código → Implementar → Nueva implementación → Tipo: Aplicación web
+ *   · Ejecutar como: Yo
+ *   · Quién tiene acceso: Cualquier persona
+ * Copia la URL que termina en /exec y pégala en URL_CONTADOR dentro del index.html.
+ *
+ * Si cambias este código después, debes crear una NUEVA VERSIÓN en
+ * Implementar → Administrar implementaciones → Editar → Nueva versión.
+ */
 
-    .btn { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; color: #fff;
-      background: linear-gradient(135deg, #f0283a, #b8101f); padding: 17px 18px; border-radius: 14px;
-      text-decoration: none; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 18px;
-      letter-spacing: .01em; border: 0; cursor: pointer;
-      box-shadow: 0 8px 24px rgba(225,29,46,.45), inset 0 1px 0 rgba(255,255,255,.25);
-      transition: transform .2s ease, box-shadow .2s ease; }
-    .btn::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
-      background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
-      transform: skewX(-20deg); animation: shine 3.8s ease-in-out infinite; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(225,29,46,.6), inset 0 1px 0 rgba(255,255,255,.3); }
-    .btn:active { transform: scale(.98); }
-    .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-    .url { display: block; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.45); color: var(--text); font-size: 12px; margin-bottom: 14px; line-height: 1.45; word-break: break-all;
-      text-align: left; -webkit-user-select: all; user-select: all;
-      font-family: ui-monospace, Menlo, Consolas, monospace; }
-    .btn.copied { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 8px 24px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.25); }
-    .ic { flex: none; }
-    .ic-check { display: none; }
-    .btn.copied .ic-copy { display: none; }
-    .btn.copied .ic-check { display: block; animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
-    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
-    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); pointer-events: none;
-      transform: scale(0); animation: rip .65s ease-out forwards; }
-    @keyframes rip { to { transform: scale(1); opacity: 0; } }
-    #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
+var NOMBRE_HOJA = 'Visitas';
+// Cambia esta frase por cualquier texto tuyo. Sirve para que los datos guardados no se puedan revertir.
+var SAL = 'zymar-cambia-esta-frase';
 
-    /* Entrar: opción secundaria */
-    .or { margin: 14px 0 10px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
-    .btn-alt { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.28); box-shadow: none;
-      padding: 13px 18px; font-size: 16px; }
-    .btn-alt::after { display: none; }
-    .btn-alt:hover { background: rgba(255,255,255,.14); border-color: var(--red-soft); box-shadow: 0 8px 24px rgba(225,29,46,.25); }
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.id) registrar_(p);
+  return json_(resumen_());
+}
 
-    /* Anuncio: sígueme en todas mis redes */
-    .promo { position: relative; margin-top: 18px; padding: 16px 12px 14px; border-radius: 16px; overflow: hidden;
-      background: linear-gradient(160deg, rgba(225,29,46,.28), rgba(10,10,14,.65) 70%);
-      border: 1px solid rgba(255,90,103,.45);
-      box-shadow: 0 14px 40px rgba(225,29,46,.28), inset 0 1px 0 rgba(255,255,255,.16);
-      animation: promoIn .9s .25s cubic-bezier(.2,.8,.2,1) both; }
-    @keyframes promoIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
-    .promo::before { content: ""; position: absolute; top: 0; left: -90%; width: 55%; height: 100%;
-      background: linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent);
-      transform: skewX(-20deg); animation: shine 4.2s ease-in-out infinite; pointer-events: none; }
-    @keyframes shine { 0%,55% { left: -90%; } 100% { left: 150%; } }
-    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
-      font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
-      color: #fff; background: linear-gradient(135deg, #f0283a, #b8101f);
-      box-shadow: 0 4px 14px rgba(225,29,46,.55); }
-    .badge i { width: 7px; height: 7px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
-    @keyframes blink { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .25; transform: scale(.7); } }
-    .promo-t { margin: 9px 0 4px; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; font-size: clamp(12px, 3.5vw, 15px);
-      line-height: 1.2; letter-spacing: -.01em;
-      background: linear-gradient(180deg, #ffffff 35%, #ffc2c8 100%);
-      -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .promo-s { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
-    .social { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
-    .social:empty { display: none; }
-    .net { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
-      font-size: 12.5px; font-weight: 600; color: #fff; text-decoration: none;
-      background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.25);
-      transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
-    .net svg { flex: none; }
-    .net:hover { background: linear-gradient(135deg, #f0283a, #b8101f); border-color: transparent;
-      transform: translateY(-3px); box-shadow: 0 10px 24px rgba(225,29,46,.5); }
-    .net:active { transform: scale(.97); }
-    .net:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-    @media (prefers-reduced-motion: reduce) {
-      .bg, .glow, .box, .promo, .promo::before, .badge i { animation: none; }
-    }
-  </style>
-</head>
-<body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="glow" aria-hidden="true"></div>
-  <canvas id="dots" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
-  <main class="box">
-    <h1>Zymar</h1>
-    <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
-    <code class="url" id="url"></code>
-    <button class="btn" id="copy" type="button">
-      <svg class="ic ic-copy" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
-      <svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-      <span id="ctxt">Copiar enlace</span>
-    </button>
-    <div id="ok" role="status" aria-live="polite"></div>
+// Registra al visitante solo si NO se había visto antes (por navegador o por IP)
+function registrar_(p) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var hoja = hoja_();
+    var hid = hash_(String(p.id).substring(0, 100));
+    var hip = p.h ? hash_(String(p.h).substring(0, 60)) : '';
+    var porId = existe_(hoja, 1, hid);
+    var porIp = hip ? existe_(hoja, 2, hip) : false;
+    if (porId && (porIp || !hip)) return;            // ya conocido: no se cuenta ni se guarda nada
 
-    <p class="or">o si prefieres, también puedes</p>
-    <a class="btn btn-alt" id="enter" href="#" target="_blank" rel="noopener noreferrer">
-      <span>Entrar</span>
-      <svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
+    var cc = /^[A-Za-z]{2}$/.test(p.c || '') ? String(p.c).toUpperCase() : 'XX';
+    var cuenta = (porId || porIp) ? 0 : 1;            // 1 = visitante nuevo, 0 = mismo visitante con otro dato (otra IP u otro navegador)
+    hoja.appendRow([hid, hip, cc, cuenta, new Date()]);
+    CacheService.getScriptCache().remove('resumen');
+  } finally {
+    lock.releaseLock();
+  }
+}
 
-    <section class="promo" aria-label="Redes sociales">
-      <span class="badge"><i></i>Únete a la comunidad</span>
-      <h2 class="promo-t">Sígueme en todas mis redes sociales</h2>
-      <p class="promo-s">No te pierdas nada: novedades, contenido nuevo y mucho más.</p>
-      <div class="social" id="social"></div>
-    </section>
-  </main>
-  <script>
-    // Para cambiar el enlace, edita solo esta línea.
-    var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
-    var $ = function (id) { return document.getElementById(id); };
-    $('url').textContent = URL_APP;
-    $('enter').href = URL_APP;
-    var timer;
-    function done(ok) {
-      var b = $('copy');
-      $('ctxt').textContent = ok ? '¡Enlace copiado!' : 'Mantén presionado el enlace para copiarlo';
-      if (ok) b.classList.add('copied');
-      clearTimeout(timer);
-      timer = setTimeout(function () { $('ctxt').textContent = 'Copiar enlace'; b.classList.remove('copied'); }, 2500);
-    }
-    function fallback() {
-      var t = document.createElement('textarea');
-      t.value = URL_APP; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
-      document.body.appendChild(t); t.select(); t.setSelectionRange(0, 99999);
-      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(t);
-      done(ok);
-    }
-    $('copy').addEventListener('click', function () {
-      if (!URL_APP) return;
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(URL_APP).then(function () { done(true); }, fallback);
-      } else { fallback(); }
+// Total de visitantes únicos y cuántos hay por país (los 8 primeros)
+function resumen_() {
+  var cache = CacheService.getScriptCache();
+  var guardado = cache.get('resumen');
+  if (guardado) return JSON.parse(guardado);
+
+  var hoja = hoja_();
+  var n = hoja.getLastRow() - 1;
+  var total = 0, por = {};
+  if (n > 0) {
+    hoja.getRange(2, 3, n, 2).getValues().forEach(function (f) {
+      if (Number(f[1]) === 1) {
+        total++;
+        por[f[0]] = (por[f[0]] || 0) + 1;
+      }
     });
-    // Efecto de onda al tocar los botones
-    function ripple(e) {
-      var el = e.currentTarget, r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, o = document.createElement('span');
-      o.className = 'ripple'; o.style.width = o.style.height = d + 'px';
-      o.style.left = (e.clientX - r.left - d / 2) + 'px'; o.style.top = (e.clientY - r.top - d / 2) + 'px';
-      el.appendChild(o); setTimeout(function () { o.remove(); }, 700);
-    }
-    $('copy').addEventListener('pointerdown', ripple);
-    $('enter').addEventListener('pointerdown', ripple);
+  }
+  var paises = Object.keys(por)
+    .filter(function (c) { return c !== 'XX'; })
+    .map(function (c) { return { c: c, n: por[c] }; })
+    .sort(function (a, b) { return b.n - a.n; })
+    .slice(0, 8);
 
-    // Redes sociales: pega tu enlace entre las comillas de cada red. Las que dejes vacías no se muestran.
-    var ICONS = {
-      Instagram: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
-      TikTok: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2 4.2 5 4.5"/></svg>',
-      YouTube: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor" stroke="none"/></svg>',
-      Facebook: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg>'
-    };
-    var SOCIAL = [
-      { n: 'Instagram', u: '' },
-      { n: 'TikTok',    u: '' },
-      { n: 'YouTube',   u: '' },
-      { n: 'Facebook',  u: '' }
-    ];
-    SOCIAL.forEach(function (r) {
-      if (!r.u) return;
-      var a = document.createElement('a');
-      a.className = 'net'; a.href = r.u; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.innerHTML = (ICONS[r.n] || '') + '<span></span>';
-      a.lastChild.textContent = r.n;
-      $('social').appendChild(a);
-    });
+  var res = { total: total, paises: paises };
+  cache.put('resumen', JSON.stringify(res), 300);
+  return res;
+}
 
-    // Fondo de pantalla (Dropbox). Si el primer enlace falla, prueba el enlace directo.
-    (function () {
-      var base = 'https://www.dropbox.com/scl/fi/16lbymfscgsze7lbgp7nc/ChatGPT-Image-13-sept-2026-09_37_47-p.m..png?rlkey=cw8iog21icw665a1b0tjtv101&st=4fykjltk';
-      var candidatos = [
-        base + '&raw=1',
-        base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'),
-        base + '&dl=1'
-      ];
-      var i = 0, bg = document.querySelector('.bg');
-      function probar() {
-        if (i >= candidatos.length) return;
-        var u = candidatos[i++], img = new Image();
-        img.onload = function () { bg.style.backgroundImage = 'url("' + u + '")'; };
-        img.onerror = probar;
-        img.src = u;
-      }
-      probar();
-    })();
+function existe_(hoja, col, valor) {
+  var filas = Math.max(hoja.getLastRow() - 1, 1);
+  return hoja.getRange(2, col, filas, 1).createTextFinder(valor).matchEntireCell(true).findNext() !== null;
+}
 
-    // Puntos animados sobre el fondo (ligero: sin librerías, no usa ancho de banda extra)
-    (function () {
-      var c = document.getElementById('dots'), x = c.getContext('2d');
-      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var W, H, P = [], LINK, mx = -9999, my = -9999, raf = 0, t = 0;
+// Guarda solo huellas (hash), nunca la IP ni el identificador reales
+function hash_(texto) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, SAL + '|' + texto, Utilities.Charset.UTF_8);
+  return 'h' + bytes.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+}
 
-      function size() {
-        W = window.innerWidth; H = window.innerHeight;
-        c.width = W * dpr; c.height = H * dpr;
-        c.style.width = W + 'px'; c.style.height = H + 'px';
-        x.setTransform(dpr, 0, 0, dpr, 0, 0);
-        LINK = W < 600 ? 90 : 130;
-        var n = Math.min(110, Math.round(W * H / 15000));
-        while (P.length < n) P.push({
-          x: Math.random() * W, y: Math.random() * H,
-          vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
-          r: .8 + Math.random() * 1.6, red: Math.random() < .18, ph: Math.random() * 6.28
-        });
-        P.length = n;
-      }
+function hoja_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var hoja = ss.getSheetByName(NOMBRE_HOJA);
+  if (!hoja) {
+    hoja = ss.insertSheet(NOMBRE_HOJA);
+    hoja.appendRow(['Huella navegador', 'Huella IP', 'País', 'Cuenta', 'Fecha']);
+    hoja.setFrozenRows(1);
+  }
+  return hoja;
+}
 
-      function frame() {
-        t += .02;
-        x.clearRect(0, 0, W, H);
-        var i, j, a, b, dx, dy, d, al;
-        for (i = 0; i < P.length; i++) {
-          a = P[i];
-          if (!reduce) {
-            a.x += a.vx; a.y += a.vy;
-            if (a.x < -10) a.x = W + 10; else if (a.x > W + 10) a.x = -10;
-            if (a.y < -10) a.y = H + 10; else if (a.y > H + 10) a.y = -10;
-          }
-          for (j = i + 1; j < P.length; j++) {
-            b = P[j]; dx = a.x - b.x; dy = a.y - b.y; d = Math.sqrt(dx * dx + dy * dy);
-            if (d < LINK) {
-              al = (1 - d / LINK) * .22;
-              x.strokeStyle = 'rgba(255,255,255,' + al + ')';
-              x.lineWidth = .7; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
-            }
-          }
-          dx = a.x - mx; dy = a.y - my; d = Math.sqrt(dx * dx + dy * dy);
-          if (d < LINK + 40) {
-            al = (1 - d / (LINK + 40)) * .55;
-            x.strokeStyle = 'rgba(255,90,103,' + al + ')';
-            x.lineWidth = .9; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(mx, my); x.stroke();
-          }
-          al = .45 + .4 * Math.sin(t + a.ph);
-          x.fillStyle = a.red ? 'rgba(255,90,103,' + al + ')' : 'rgba(255,255,255,' + al + ')';
-          x.beginPath(); x.arc(a.x, a.y, a.r, 0, 6.2832); x.fill();
-        }
-        if (!reduce) raf = requestAnimationFrame(frame);
-      }
-
-      function start() { cancelAnimationFrame(raf); frame(); }
-      size(); start();
-      window.addEventListener('resize', function () { size(); if (reduce) frame(); });
-      window.addEventListener('pointermove', function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
-      window.addEventListener('pointerleave', function () { mx = my = -9999; });
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) cancelAnimationFrame(raf); else if (!reduce) start();
-      });
-    })();
-  </script>
-</body>
-</html>
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
