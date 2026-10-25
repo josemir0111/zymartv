@@ -231,15 +231,19 @@
 
     // Contador de visitantes ÚNICOS, todo dentro del index (sin servidor propio).
     // Usa el servicio gratuito Abacus (abacus.jasoncameron.dev): un contador general y uno por país.
-    // IMPORTANTE: cambia NS por un nombre único tuyo (solo letras, números y guiones) para que nadie más use tu contador.
+    // Anti-duplicados: cada visitante deja dos "marcas" anónimas (una de su navegador y una de su IP, ambas cifradas).
+    // Solo se suma si NINGUNA de las dos existía antes, así que entrar de nuevo, o hacerlo en incógnito, no vuelve a contar.
+    // IMPORTANTE: cambia NS y SAL por textos únicos tuyos (letras, números y guiones; NS entre 3 y 64 caracteres).
     var CONTADOR = {
       api: 'https://abacus.jasoncameron.dev',
       ns: 'zymar-k7q2x9',
+      sal: 'zymar-cambia-esta-frase',
+      dedupIP: true,   // true = también evita duplicados por IP (cubre incógnito). false = solo por navegador
       // Países que se muestran con bandera (código ISO de 2 letras). Los demás igual suman al total.
-      paises: ['PE','MX','CO','AR','CL','EC','BO','VE','UY','PY','CR','PA','GT','HN','SV','NI','DO','CU','PR','ES','US','BR']
+      paises: ['PE','MX','CO','AR','CL','EC','BO','VE','UY','PY','CR','PA','ES','US','BR','DO']
     };
     (function () {
-      var K_REG = 'zymar_vreg', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
+      var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
       var API = CONTADOR.api + '/', NS = CONTADOR.ns + '/', PAISES = CONTADOR.paises;
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -267,23 +271,28 @@
         $('visitas').hidden = false;
       }
 
-      // Lee un contador: número (0 si aún no existe) o null si no hubo conexión
+      // Lee un contador: número (0 si aún no existe) o null si hubo un error real (sin conexión, límite, servidor)
       function leer(k) {
         return fetch(API + 'get/' + NS + k)
-          .then(function (r) { return r.ok ? r.json() : { value: 0 }; })
-          .then(function (d) { return Number(d.value) || 0; })
+          .then(function (r) {
+            if (r.ok) return r.json().then(function (d) { return Number(d.value) || 0; });
+            return (r.status >= 400 && r.status < 500 && r.status !== 429) ? 0 : null;
+          })
           .catch(function () { return null; });
       }
-      // Suma 1 a un contador (lo crea si no existe)
+      // Suma 1 a un contador (lo crea si no existe) y devuelve su nuevo valor
       function sumar(k) {
-        return fetch(API + 'hit/' + NS + k).then(function (r) { if (!r.ok) throw new Error('hit'); return r.json(); });
+        return fetch(API + 'hit/' + NS + k).then(function (r) {
+          if (!r.ok) throw new Error('hit');
+          return r.json();
+        }).then(function (d) { return Number(d.value); });
       }
-      // Total + los países con más visitantes (hasta 8)
+      // Total + los países con más visitantes (hasta 8). Si algo falla, no devuelve datos a medias.
       function resumen() {
         var pedidos = [leer('total')].concat(PAISES.map(function (c) { return leer('pais-' + c.toLowerCase()); }));
         return Promise.all(pedidos).then(function (v) {
-          if (v[0] === null) throw new Error('sin conexion');
-          var lista = PAISES.map(function (c, i) { return { c: c, n: v[i + 1] || 0 }; })
+          if (v.indexOf(null) !== -1) throw new Error('lectura incompleta');
+          var lista = PAISES.map(function (c, i) { return { c: c, n: v[i + 1] }; })
             .filter(function (p) { return p.n > 0; })
             .sort(function (a, b) { return b.n - a.n; })
             .slice(0, 8);
@@ -292,12 +301,47 @@
       }
       function guardar(d) { pintar(d); lsSet(K_CACHE, JSON.stringify({ t: Date.now(), d: d })); }
 
-      // País del visitante (si el primer servicio falla, prueba el segundo)
+      // Huella anónima (hash): nunca se guarda la IP ni el identificador reales
+      function cyrb53(s, seed) {
+        var h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed, i, c;
+        for (i = 0; i < s.length; i++) { c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+      }
+      function huella(txt) {
+        var t = CONTADOR.sal + '|' + txt;
+        if (window.crypto && crypto.subtle && window.TextEncoder) {
+          return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function (buf) {
+            return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('').slice(0, 32);
+          }).catch(function () { return (cyrb53(t, 1).toString(16) + cyrb53(t, 2).toString(16)).slice(0, 32); });
+        }
+        return Promise.resolve((cyrb53(t, 1).toString(16) + cyrb53(t, 2).toString(16)).slice(0, 32));
+      }
+
+      // IP y país del visitante (si el primer servicio falla, prueba el segundo)
       function geo() {
         return fetch('https://api.country.is/').then(function (r) { return r.json(); })
           .catch(function () { return fetch('https://get.geojs.io/v1/ip/country.json').then(function (r) { return r.json(); }); })
-          .then(function (g) { return String(g.country || '').toUpperCase(); })
-          .catch(function () { return ''; });
+          .then(function (g) { return { ip: String(g.ip || ''), cc: String(g.country || '').toUpperCase() }; })
+          .catch(function () { return { ip: '', cc: '' }; });
+      }
+
+      // Identificador anónimo de este navegador
+      var vid = lsGet(K_ID);
+      if (!vid) {
+        vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2);
+        lsSet(K_ID, vid);
+      }
+
+      // Deja las marcas del visitante. Cada "hit" devuelve cuántas veces se usó esa marca (1 = era nueva).
+      // Es un visitante nuevo SOLO si todas sus marcas valen 1. Si alguna ya existía, es alguien que ya entró.
+      function esNuevo(g) {
+        var marcas = [huella('d|' + vid).then(function (h) { return sumar('d-' + h); })];
+        if (CONTADOR.dedupIP && g.ip) marcas.push(huella('i|' + g.ip).then(function (h) { return sumar('v-' + h); }));
+        return Promise.all(marcas).then(function (vals) {
+          return vals.every(function (n) { return n === 1; });
+        });
       }
 
       // Muestra al instante el último número guardado mientras llega el actualizado
@@ -305,16 +349,19 @@
       try { cache = JSON.parse(lsGet(K_CACHE)); } catch (e) {}
       if (cache && cache.d) pintar(cache.d);
 
-      // Si este navegador ya fue contado, solo actualiza el número (y no más de una vez cada 5 min)
+      // Si este navegador ya fue revisado, solo actualiza el número (y no más de una vez cada 5 min)
       if (lsGet(K_REG)) {
         if (!cache || Date.now() - cache.t > FRESCO) resumen().then(guardar).catch(function () {});
         return;
       }
-      // Primera visita de este navegador: suma al total y a su país, y luego lee los números
-      geo().then(function (cc) {
-        var sumas = [sumar('total')];
-        if (cc && PAISES.indexOf(cc) >= 0) sumas.push(sumar('pais-' + cc.toLowerCase()).catch(function () {}));
-        return Promise.all(sumas);
+      // Primera vez en este navegador: comprueba si es un visitante nuevo y, solo entonces, suma al total y a su país
+      geo().then(function (g) {
+        return esNuevo(g).then(function (nuevo) {
+          if (!nuevo) return;
+          var sumas = [sumar('total')];
+          if (g.cc && PAISES.indexOf(g.cc) >= 0) sumas.push(sumar('pais-' + g.cc.toLowerCase()).catch(function () {}));
+          return Promise.all(sumas);
+        });
       }).then(function () {
         lsSet(K_REG, '1');
         return resumen();
