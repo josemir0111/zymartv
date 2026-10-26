@@ -13,53 +13,75 @@
     a:focus-visible, button:focus-visible { outline:3px solid #fff; outline-offset:3px; box-shadow:0 0 0 3px var(--red); }
     #dots { position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.18; }
 
+    /* ===== Barra superior ===== */
+    .nav { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:28px; padding:calc(14px + env(safe-area-inset-top,0px)) var(--safe-x) 14px;
+      background:linear-gradient(180deg,rgba(0,0,0,.85),transparent); transition:background .3s; }
+    .nav.solid { background:rgba(11,11,14,.96); box-shadow:0 1px 0 rgba(255,255,255,.06); }
+    .logo { font-size:clamp(24px,4vw,32px); font-weight:900; letter-spacing:.02em; color:var(--red); text-decoration:none; text-shadow:0 2px 12px rgba(229,9,20,.35); }
+    .nav nav { display:flex; gap:20px; }
+    .nav nav a { color:#e5e5e5; text-decoration:none; font-size:14px; font-weight:600; transition:color .2s; }
+    .nav nav a:hover { color:#fff; }
+    .live { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:#e5e5e5; }
+    .live i { width:8px; height:8px; border-radius:50%; background:var(--red); animation:blink 1.6s ease-in-out infinite; }
+
     /* ===== Portada ===== */
-    .hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:center; overflow:hidden;
-      padding:max(40px,env(safe-area-inset-top)) var(--safe-x) 48px; }
-    .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:blur(7px) saturate(.75) contrast(.95) brightness(.34); transform:scale(1.06);
-      animation:drift 40s ease-in-out infinite alternate; }
-    @keyframes drift { from { transform:scale(1.06); } to { transform:scale(1.12); } }
-    .hero::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-      background:radial-gradient(ellipse at 78% 35%,rgba(229,9,20,.14),transparent 60%),
-                 linear-gradient(180deg,rgba(15,15,18,.55),rgba(15,15,18,.8) 70%,var(--bg) 100%); }
-    .grid { position:relative; z-index:3; width:100%; max-width:1180px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr); gap:40px; align-items:center; }
-    .txt { text-align:center; padding:28px 22px 24px; border-radius:22px; background:rgba(12,12,16,.68); border:1px solid rgba(255,255,255,.1);
-      -webkit-backdrop-filter:blur(14px) saturate(1.2); backdrop-filter:blur(14px) saturate(1.2); box-shadow:0 20px 50px rgba(0,0,0,.5);
-      animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
+    .hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end; overflow:hidden; padding:120px var(--safe-x) clamp(56px,10vh,110px); }
+    .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:saturate(.85) brightness(.55); transform:scale(1.04); animation:drift 40s ease-in-out infinite alternate; }
+    @keyframes drift { from { transform:scale(1.04); } to { transform:scale(1.1); } }
+    .hero::before { content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+      background:linear-gradient(90deg,rgba(11,11,14,.92) 0%,rgba(11,11,14,.55) 45%,transparent 80%),
+                 linear-gradient(180deg,transparent 55%,var(--bg) 100%),
+                 radial-gradient(ellipse at 85% 30%,rgba(229,9,20,.16),transparent 55%); }
+    .grid { position:relative; z-index:3; width:100%; max-width:1280px; margin:0 auto; }
+    .txt { max-width:600px; animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
     @keyframes blink { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.25; transform:scale(.7); } }
-    h1 { margin:0 0 22px; font-size:clamp(52px,12vw,96px); font-weight:800; line-height:1; letter-spacing:-.035em; color:#fff; }
+    .tag { display:inline-block; margin-bottom:14px; padding:4px 10px; border-radius:4px; background:var(--red); font-size:12px; font-weight:800; letter-spacing:.04em; }
+    h1 { margin:0 0 14px; font-size:clamp(64px,14vw,132px); font-weight:900; line-height:.92; letter-spacing:-.045em; text-shadow:0 6px 30px rgba(0,0,0,.6); }
+    .lead { margin:0 0 22px; max-width:46ch; font-size:clamp(16px,2.4vw,20px); line-height:1.45; color:#e8e8ea; text-shadow:0 2px 12px rgba(0,0,0,.8); }
     .sub { margin:0 0 8px; font-size:13px; font-weight:600; color:var(--muted); }
-    .url { display:block; width:100%; max-width:480px; margin:0 auto 14px; padding:12px 14px; border-radius:10px; text-align:left; border:1px solid rgba(255,255,255,.16);
-      background:rgba(0,0,0,.5); color:#e8e8ea; font-size:12px; line-height:1.45; word-break:break-all; -webkit-user-select:all; user-select:all;
+    .url { display:block; width:100%; max-width:480px; margin:0 0 16px; padding:11px 14px; border-radius:6px; border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.55); color:#e8e8ea; font-size:12px; line-height:1.45; word-break:break-all; -webkit-user-select:all; user-select:all;
       font-family:ui-monospace,Menlo,Consolas,monospace; }
-    .acts { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-    .btn { position:relative; overflow:hidden; border:0; border-radius:10px; padding:14px 28px; font-size:16px; font-weight:700; cursor:pointer; text-decoration:none; color:#fff;
-      display:inline-flex; align-items:center; justify-content:center; gap:8px; transition:transform .15s, background .15s, box-shadow .15s; }
-    .btn:active { transform:scale(.98); }
-    .btn-play { background:#fff; color:#000; box-shadow:0 8px 24px rgba(0,0,0,.4); }
-    .btn-play:hover { background:#ececec; transform:translateY(-2px); }
-    .btn-info { background:rgba(109,109,110,.6); }
-    .btn-info:hover { background:rgba(109,109,110,.85); transform:translateY(-1px); }
-    .btn.copied { background:linear-gradient(135deg,#22c55e,#15803d); }
+    .acts { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { position:relative; overflow:hidden; border:0; border-radius:6px; padding:13px 30px; font-size:17px; font-weight:700; cursor:pointer; text-decoration:none; color:#fff;
+      display:inline-flex; align-items:center; justify-content:center; gap:10px; transition:transform .15s, background .15s; }
+    .btn:active { transform:scale(.97); }
+    .btn-play { background:#fff; color:#000; }
+    .btn-play:hover { background:rgba(255,255,255,.78); }
+    .btn-info { background:rgba(109,109,110,.7); }
+    .btn-info:hover { background:rgba(109,109,110,.45); }
+    .btn.copied { background:#1db954; }
     #ok { min-height:18px; margin-top:10px; font-size:13px; color:#cfcfd4; }
 
-    /* ===== Categorías del sistema (pósters) ===== */
-    .stack { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x proximity; scroll-padding-left:var(--safe-x); scrollbar-width:none; -webkit-overflow-scrolling:touch;
-      margin:0 calc(var(--safe-x) * -1); padding:6px var(--safe-x) 14px; animation:rise .8s .15s cubic-bezier(.2,.8,.2,1) both; }
+    /* ===== Filas de catálogo ===== */
+    .row { position:relative; z-index:3; margin-top:-56px; padding:0 var(--safe-x) 20px; }
+    .row h2 { margin:0 0 12px; font-size:clamp(18px,2.4vw,24px); font-weight:700; }
+    .stack { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x proximity; scroll-padding-left:var(--safe-x); scrollbar-width:none; -webkit-overflow-scrolling:touch;
+      margin:0 calc(var(--safe-x) * -1); padding:10px var(--safe-x) 30px; }
     .stack::-webkit-scrollbar { display:none; }
-    .poster { position:relative; flex:none; width:104px; aspect-ratio:2/3; border-radius:14px; overflow:hidden; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:flex-end;
-      padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.14); box-shadow:0 14px 30px rgba(0,0,0,.5); transition:transform .3s ease; }
-    .poster img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; opacity:0; transition:opacity .6s ease, transform .6s ease; }
+    .poster { position:relative; flex:none; width:clamp(124px,19vw,210px); aspect-ratio:2/3; border-radius:6px; overflow:hidden; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:flex-end;
+      padding:12px; transition:transform .3s ease, box-shadow .3s ease; cursor:default; }
+    .poster img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease, transform .6s ease; }
     .poster.has-img img { opacity:1; }
-    .poster:hover img { transform:scale(1.08); }
     .poster.has-img .e { display:none; }
-    .poster::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.85)); }
-    .poster .e { position:absolute; top:36%; left:0; right:0; text-align:center; font-size:36px; transform:translateY(-50%); z-index:1; filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
-    .poster b { position:relative; z-index:2; font-size:12.5px; line-height:1.2; text-shadow:0 1px 6px rgba(0,0,0,.7); }
+    .poster::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.9)); }
+    .poster .e { position:absolute; top:36%; left:0; right:0; text-align:center; font-size:44px; transform:translateY(-50%); z-index:1; }
+    .poster b { position:relative; z-index:2; font-size:clamp(14px,1.6vw,17px); line-height:1.2; }
+    @media (hover:hover) { .poster:hover { transform:scale(1.08); z-index:5; box-shadow:0 18px 40px rgba(0,0,0,.7); } .poster:hover img { transform:scale(1.06); } }
     .g1 { background:linear-gradient(160deg,#f59e0b,#2a1705); } .g2 { background:linear-gradient(160deg,#e50914,#2a0508); }
     .g3 { background:linear-gradient(160deg,#7c3aed,#12081f); } .g4 { background:linear-gradient(160deg,#0ea5e9,#06141f); }
     .g5 { background:linear-gradient(160deg,#10b981,#052a1d); } .g6 { background:linear-gradient(160deg,#1db954,#06210f); }
+
+    /* ===== Acerca de (mosaicos tipo Spotify) ===== */
+    .about { position:relative; z-index:3; padding:10px var(--safe-x) 60px; max-width:calc(1280px + 2 * var(--safe-x)); margin:0 auto; }
+    .about h2 { margin:0 0 14px; font-size:clamp(18px,2.4vw,24px); font-weight:700; }
+    .tiles { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+    .tile { display:flex; align-items:center; gap:16px; padding:16px; border-radius:8px; background:rgba(255,255,255,.07); transition:background .25s; }
+    .tile:hover { background:rgba(255,255,255,.13); }
+    .tile .ico { flex:none; width:56px; height:56px; border-radius:6px; display:grid; place-items:center; font-size:26px; }
+    .tile b { display:block; font-size:15px; margin-bottom:3px; }
+    .tile span { font-size:13px; line-height:1.4; color:var(--muted); }
 
     /* ===== Pie de página ===== */
     .foot { position:relative; z-index:3; border-top:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02); }
@@ -98,42 +120,52 @@
       transform: scale(0); animation: rip .65s ease-out forwards; }
     @keyframes rip { to { transform: scale(1); opacity: 0; } }
 
-    @media (min-width:900px) {
-      .grid { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:56px; }
-      .poster:nth-child(4) { display:flex; }
-      .txt { text-align:left; padding:36px 36px 30px; } .url { margin-left:0; } .acts { justify-content:flex-start; }
-      .stack { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; overflow:visible; max-width:380px; margin:0 auto; padding:0 0 4px; scroll-snap-type:none; }
-      .poster { width:auto; }
-      .poster:hover { transform:translateY(-6px); z-index:5; }
-    }
     @keyframes float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
-    @media (prefers-reduced-motion:reduce) { .bg, .btn::after, .promo::before, .badge i, .poster, .txt, .stack { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .bg, .live i, .badge i, .txt { animation:none; } }
   </style>
 </head>
 <body>
   <canvas id="dots" aria-hidden="true"></canvas>
+  <header class="nav" id="nav">
+    <a class="logo" href="#">ZYMAR</a>
+    <nav><a href="#catalogo">Catálogo</a><a href="#info">Acerca de</a></nav>
+    <span class="live"><i></i>En línea</span>
+  </header>
   <main>
     <section class="hero">
       <div class="bg" aria-hidden="true"></div>
       <div class="grid">
         <div class="txt">
+          <span class="tag">Entretenimiento</span>
           <h1>Zymar</h1>
+          <p class="lead">Radio, TV en vivo, películas, series, documentales y música. Todo reunido en un solo lugar.</p>
           <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
           <code class="url" id="url"></code>
           <div class="acts">
-            <a class="btn btn-play" id="enter" href="#" target="_blank" rel="noopener noreferrer"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>Entrar</span></a>
+            <a class="btn btn-play" id="enter" href="#" target="_blank" rel="noopener noreferrer"><svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>Entrar</span></a>
             <button class="btn btn-info" id="copy" type="button"><svg class="ic ic-copy" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="ctxt">Copiar enlace</span></button>
           </div>
           <div id="ok" role="status" aria-live="polite"></div>
         </div>
-        <div class="stack" role="list" aria-label="Categorías">
-          <div class="poster g1" role="listitem" data-img="radio"><span class="e">📻</span><b>Radio</b></div>
-          <div class="poster g2" role="listitem" data-img="tv"><span class="e">📡</span><b>TV en vivo</b></div>
-          <div class="poster g3" role="listitem" data-img="peliculas"><span class="e">🎬</span><b>Películas</b></div>
-          <div class="poster g4" role="listitem" data-img="series"><span class="e">📺</span><b>Series</b></div>
-          <div class="poster g5" role="listitem" data-img="documentales"><span class="e">🌍</span><b>Documentales</b></div>
-          <div class="poster g6" role="listitem" data-img="musica"><span class="e">🎵</span><b>Música</b></div>
-        </div>
+      </div>
+    </section>
+    <section class="row" id="catalogo">
+      <h2>Explora el catálogo</h2>
+      <div class="stack" role="list" aria-label="Categorías">
+        <div class="poster g1" role="listitem" data-img="radio"><span class="e">📻</span><b>Radio</b></div>
+        <div class="poster g2" role="listitem" data-img="tv"><span class="e">📡</span><b>TV en vivo</b></div>
+        <div class="poster g3" role="listitem" data-img="peliculas"><span class="e">🎬</span><b>Películas</b></div>
+        <div class="poster g4" role="listitem" data-img="series"><span class="e">📺</span><b>Series</b></div>
+        <div class="poster g5" role="listitem" data-img="documentales"><span class="e">🌍</span><b>Documentales</b></div>
+        <div class="poster g6" role="listitem" data-img="musica"><span class="e">🎵</span><b>Música</b></div>
+      </div>
+    </section>
+    <section class="about" id="info">
+      <h2>Qué es Zymar</h2>
+      <div class="tiles">
+        <div class="tile"><div class="ico g2">📡</div><div><b>En vivo</b><span>Canales y radios para ver y escuchar en el momento.</span></div></div>
+        <div class="tile"><div class="ico g3">🎬</div><div><b>Cuando quieras</b><span>Películas, series y documentales para elegir a tu ritmo.</span></div></div>
+        <div class="tile"><div class="ico g6">🎵</div><div><b>En cualquier pantalla</b><span>Entra desde el celular, la tablet o la computadora.</span></div></div>
       </div>
     </section>
   </main>
@@ -146,6 +178,7 @@
     <div class="foot-bar">© <span id="yr"></span> Zymar</div>
   </footer>
   <script>
+    (function(){var n=document.getElementById('nav');function f(){n.classList.toggle('solid',window.scrollY>40);}addEventListener('scroll',f,{passive:true});f();})();
     document.getElementById('yr').textContent = new Date().getFullYear();
     document.addEventListener('DOMContentLoaded', function () { if (!document.getElementById('social').children.length) document.querySelector('.col-redes').hidden = true; });
     // Imágenes de las tarjetas: cambia aquí cualquier URL por la tuya (JPG/PNG/WebP). Si una falla, se ve el degradado con ícono.
