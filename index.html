@@ -4,74 +4,67 @@
   <meta charset="utf-8">
   <title>Zymar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#141414">
   <style>
-    :root {
-      --red: #e11d2e;
-      --red-soft: #ff5a67;
-      --text: #f4f6fb;
-      --muted: #b4b8c4;
-    }
-    * { box-sizing: border-box; }
-    html { background: #000; }
-    html, body { height: 100%; margin: 0; color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      -webkit-font-smoothing: antialiased; }
-    /* Fondo: imagen fija con zoom lento + oscurecido para que se lea el texto */
-    .bg { position: fixed; inset: 0; z-index: -2; background: #000 center / cover no-repeat;
-      filter: saturate(1.2) contrast(1.08) brightness(.9);
-      animation: drift 28s ease-in-out infinite alternate; transform-origin: center; }
-    .bg::after { content: ""; position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 50% 40%, rgba(0,0,0,.15) 0%, rgba(0,0,0,.65) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.7)); }
-    @keyframes drift { from { transform: scale(1); } to { transform: scale(1.08); } }
-    /* Brillo rojo que respira detrás de la tarjeta */
-    .glow { position: fixed; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px;
-      z-index: -1; border-radius: 50%; pointer-events: none;
-      background: radial-gradient(circle, rgba(225,29,46,.35), transparent 65%);
-      filter: blur(40px); animation: pulse 5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: .45; transform: scale(.92); } 50% { opacity: .9; transform: scale(1.08); } }
-    #dots { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-    .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-    body { display: flex; align-items: center; justify-content: center; text-align: center;
-      padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); }
-    /* Tarjeta de vidrio */
-    .box { width: 100%; max-width: 400px; padding: 32px 24px 26px; border-radius: 22px;
-      background: rgba(10,10,14,.5);
-      -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(225,29,46,.12), inset 0 1px 0 rgba(255,255,255,.12);
-      animation: enter .9s cubic-bezier(.2,.8,.2,1) both; }
-    @keyframes enter { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
-    h1 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 46px;
-      letter-spacing: -.02em; line-height: 1; margin: 0 0 10px;
-      background: linear-gradient(180deg, #ffffff 30%, #ffb3ba 100%);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      filter: drop-shadow(0 4px 18px rgba(225,29,46,.45)); }
-    .sub { color: var(--text); font-size: 17px; font-weight: 500; line-height: 1.4; margin: 0 0 22px; }
+    :root { --bg:#141414; --red:#e50914; --red-hover:#f40612; --red-soft:#ff5a67; --text:#fff; --muted:#b4b8c4; --safe-x:clamp(20px,5vw,72px); }
+    * { box-sizing:border-box; }
+    html, body { margin:0; background:var(--bg); color:var(--text); overflow-x:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+    a:focus-visible, button:focus-visible { outline:3px solid #fff; outline-offset:3px; box-shadow:0 0 0 3px var(--red); }
+    #dots { position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.5; }
 
-    .btn { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; color: #fff;
-      background: linear-gradient(135deg, #f0283a, #b8101f); padding: 17px 18px; border-radius: 14px;
-      text-decoration: none; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 18px;
-      letter-spacing: .01em; border: 0; cursor: pointer;
-      box-shadow: 0 8px 24px rgba(225,29,46,.45), inset 0 1px 0 rgba(255,255,255,.25);
-      transition: transform .2s ease, box-shadow .2s ease; }
-    .btn::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
-      background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
-      transform: skewX(-20deg); animation: shine 3.8s ease-in-out infinite; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(225,29,46,.6), inset 0 1px 0 rgba(255,255,255,.3); }
-    .btn:active { transform: scale(.98); }
-    .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-    .url { display: block; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.45); color: var(--text); font-size: 12px; margin-bottom: 14px; line-height: 1.45; word-break: break-all;
-      text-align: left; -webkit-user-select: all; user-select: all;
-      font-family: ui-monospace, Menlo, Consolas, monospace; }
-    .btn.copied { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 8px 24px rgba(34,197,94,.45), inset 0 1px 0 rgba(255,255,255,.25); }
+    /* ===== Portada ===== */
+    .hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:center; overflow:hidden;
+      padding:max(40px,env(safe-area-inset-top)) var(--safe-x) 48px; }
+    .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:saturate(1.15) contrast(1.05) brightness(.7);
+      animation:drift 28s ease-in-out infinite alternate; }
+    @keyframes drift { from { transform:scale(1); } to { transform:scale(1.08); } }
+    .hero::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background:radial-gradient(ellipse at 78% 35%,rgba(229,9,20,.35),transparent 60%),
+                 linear-gradient(180deg,rgba(15,15,18,.35),rgba(15,15,18,.6) 70%,var(--bg) 100%),
+                 linear-gradient(90deg,rgba(15,15,18,.85),rgba(15,15,18,.15) 70%); }
+    .grid { position:relative; z-index:3; width:100%; max-width:1180px; margin:0 auto; display:grid; gap:40px; align-items:center; }
+    .txt { text-align:center; animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+    .tag { display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1.4px; margin-bottom:14px;
+      padding:5px 12px; border-radius:999px; background:rgba(229,9,20,.9); box-shadow:0 4px 14px rgba(229,9,20,.4); }
+    .tag i { width:7px; height:7px; border-radius:50%; background:#fff; animation:blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.25; transform:scale(.7); } }
+    h1 { margin:0 0 12px; font-size:clamp(56px,13vw,112px); font-weight:800; line-height:1; letter-spacing:-.03em;
+      background:linear-gradient(180deg,#fff 35%,#ffb3ba 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+      filter:drop-shadow(0 6px 24px rgba(229,9,20,.45)); }
+    .lead { margin:0 0 26px; font-size:clamp(17px,2.2vw,22px); font-weight:500; color:#e8e8ea; line-height:1.4; }
+    .sub { margin:0 0 8px; font-size:13px; font-weight:600; color:var(--muted); }
+    .url { display:block; width:100%; max-width:480px; margin:0 auto 14px; padding:12px 14px; border-radius:10px; text-align:left; border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.5); color:#e8e8ea; font-size:12px; line-height:1.45; word-break:break-all; -webkit-user-select:all; user-select:all;
+      font-family:ui-monospace,Menlo,Consolas,monospace; }
+    .acts { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn { position:relative; overflow:hidden; border:0; border-radius:10px; padding:14px 28px; font-size:16px; font-weight:700; cursor:pointer; text-decoration:none; color:#fff;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; transition:transform .15s, background .15s, box-shadow .15s; }
+    .btn:active { transform:scale(.98); }
+    .btn-play { background:#fff; color:#000; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+    .btn-play:hover { background:#ececec; transform:translateY(-2px); }
+    .btn-info { background:rgba(109,109,110,.6); }
+    .btn-info:hover { background:rgba(109,109,110,.85); transform:translateY(-1px); }
+    .btn.copied { background:linear-gradient(135deg,#22c55e,#15803d); }
+    #ok { min-height:18px; margin-top:10px; font-size:13px; color:#cfcfd4; }
+    .trial { margin:6px 0 0; font-size:13px; color:#ffc2c8; }
+
+    /* ===== Pósters (reemplazan al carrusel y a las filas) ===== */
+    .stack { display:flex; justify-content:center; gap:12px; animation:rise .8s .15s cubic-bezier(.2,.8,.2,1) both; }
+    .poster { position:relative; width:min(30vw,150px); aspect-ratio:2/3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end;
+      padding:12px; border:1px solid rgba(255,255,255,.14); box-shadow:0 18px 40px rgba(0,0,0,.55); }
+    .poster::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.8)); }
+    .poster .e { position:absolute; top:34%; left:0; right:0; text-align:center; font-size:clamp(34px,9vw,54px); transform:translateY(-50%); z-index:1; filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
+    .poster b { position:relative; z-index:2; font-size:13px; line-height:1.2; }
+    .poster em { position:absolute; top:10px; left:10px; z-index:2; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.1em; padding:3px 8px; border-radius:999px; background:var(--red); }
+    .g1 { background:linear-gradient(160deg,#e50914,#2a0508); } .g2 { background:linear-gradient(160deg,#7c3aed,#12081f); }
+    .g3 { background:linear-gradient(160deg,#0ea5e9,#06141f); } .g4 { background:linear-gradient(160deg,#1db954,#06210f); }
+
+    /* ===== Redes y visitantes ===== */
+    .redes { position:relative; z-index:3; padding:10px var(--safe-x) 34px; }
+    .promo { max-width:560px; margin:0 auto; text-align:center; }
+    footer { position:relative; z-index:3; padding:18px var(--safe-x) calc(26px + env(safe-area-inset-bottom,0px)); color:var(--muted); font-size:12px; text-align:center; }
     .ic { flex: none; }
     .ic-check { display: none; }
     .btn.copied .ic-copy { display: none; }
@@ -80,15 +73,6 @@
     .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); pointer-events: none;
       transform: scale(0); animation: rip .65s ease-out forwards; }
     @keyframes rip { to { transform: scale(1); opacity: 0; } }
-    #ok { min-height: 18px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
-
-    /* Entrar: opción secundaria */
-    .or { margin: 14px 0 10px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
-    .btn-alt { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.28); box-shadow: none;
-      padding: 13px 18px; font-size: 16px; }
-    .btn-alt::after { display: none; }
-    .btn-alt:hover { background: rgba(255,255,255,.14); border-color: var(--red-soft); box-shadow: 0 8px 24px rgba(225,29,46,.25); }
-
     /* Anuncio: sígueme en todas mis redes */
     .promo { position: relative; margin-top: 18px; padding: 16px 12px 14px; border-radius: 16px; overflow: hidden;
       background: linear-gradient(160deg, rgba(225,29,46,.28), rgba(10,10,14,.65) 70%);
@@ -132,43 +116,59 @@
       transform: translateY(-3px); box-shadow: 0 10px 24px rgba(225,29,46,.5); }
     .net:active { transform: scale(.97); }
     .net:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-    @media (prefers-reduced-motion: reduce) {
-      .bg, .glow, .box, .promo, .promo::before, .badge i { animation: none; }
+
+    @media (min-width:900px) {
+      .grid { grid-template-columns:1.05fr .95fr; gap:56px; }
+      .txt { text-align:left; } .url { margin-left:0; } .acts { justify-content:flex-start; }
+      .stack { position:relative; height:480px; display:block; }
+      .poster { position:absolute; width:190px; animation:float 6s ease-in-out infinite; transition:transform .3s ease; }
+      .poster:nth-child(1) { left:2%; top:70px; --r:-9deg; } .poster:nth-child(2) { left:28%; top:10px; --r:-2deg; z-index:2; animation-delay:-1.5s; }
+      .poster:nth-child(3) { left:54%; top:60px; --r:6deg; animation-delay:-3s; } .poster:nth-child(4) { left:74%; top:150px; --r:12deg; width:160px; animation-delay:-4.5s; }
+      .poster { transform:rotate(var(--r)); }
+      .poster:hover { transform:rotate(0) translateY(-10px) scale(1.06); z-index:5; animation-play-state:paused; }
     }
+    @keyframes float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
+    @media (prefers-reduced-motion:reduce) { .bg, .tag i, .btn::after, .promo::before, .badge i, .poster, .txt, .stack { animation:none; } }
   </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="glow" aria-hidden="true"></div>
   <canvas id="dots" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
-  <main class="box">
-    <h1>Zymar</h1>
-    <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
-    <code class="url" id="url"></code>
-    <button class="btn" id="copy" type="button">
-      <svg class="ic ic-copy" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
-      <svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-      <span id="ctxt">Copiar enlace</span>
-    </button>
-    <div id="ok" role="status" aria-live="polite"></div>
-
-    <p class="or">o si prefieres, también puedes</p>
-    <a class="btn btn-alt" id="enter" href="#" target="_blank" rel="noopener noreferrer">
-      <span>Entrar</span>
-      <svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
-
-    <section class="promo" aria-label="Redes sociales">
+  <main>
+    <section class="hero">
+      <div class="bg" aria-hidden="true"></div>
+      <div class="grid">
+        <div class="txt">
+          <span class="tag"><i></i>Streaming</span>
+          <h1>Zymar</h1>
+          <p class="lead">Películas, series y TV en vivo en un solo lugar.</p>
+          <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
+          <code class="url" id="url"></code>
+          <div class="acts">
+            <a class="btn btn-play" id="enter" href="#" target="_blank" rel="noopener noreferrer"><svg class="ic" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>Entrar</span></a>
+            <button class="btn btn-info" id="copy" type="button"><svg class="ic ic-copy" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><svg class="ic ic-check" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="ctxt">Copiar enlace</span></button>
+          </div>
+          <div id="ok" role="status" aria-live="polite"></div>
+          <p class="trial">🎁 ¿Primera vez? Pide tu cuenta de prueba gratuita</p>
+        </div>
+        <div class="stack" aria-hidden="true">
+          <div class="poster g1"><em>EN VIVO</em><span class="e">📡</span><b>TV en vivo</b></div>
+          <div class="poster g2"><span class="e">🎬</span><b>Películas</b></div>
+          <div class="poster g3"><span class="e">📺</span><b>Series</b></div>
+          <div class="poster g4"><span class="e">⬇️</span><b>Descargas</b></div>
+        </div>
+      </div>
+    </section>
+    <div class="redes"><section class="promo" aria-label="Redes sociales">
       <div class="visitas" id="visitas" hidden>
         <span class="badge"><i></i><b id="vtotal">0</b>&nbsp;visitantes</span>
         <div class="paises" id="paises"></div>
       </div>
       <h2 class="promo-t">Sígueme en todas mis redes sociales</h2>
-      <p class="promo-s">No te pierdas nada: novedades, contenido nuevo y mucho más.</p>
       <div class="social" id="social"></div>
-    </section>
+    </section></div>
   </main>
+  <footer>© <span id="yr"></span> Zymar</footer>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
   <script>
     // Para cambiar el enlace, edita solo esta línea.
     var URL_APP = 'https://script.google.com/macros/s/AKfycbxg7tB6WyJyQCkWkigO-jE3pGUysVmLF6tR5WpWnSouXfXxvr53y0ZTx87zrUx_teTe/exec';
