@@ -14,17 +14,12 @@
     #dots { position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.18; }
 
     /* ===== Barra superior ===== */
-    .nav { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:28px; padding:calc(14px + env(safe-area-inset-top,0px)) var(--safe-x) 14px;
-      background:linear-gradient(180deg,rgba(0,0,0,.85),transparent); transition:background .3s; }
-    .nav.solid { background:rgba(11,11,14,.96); box-shadow:0 1px 0 rgba(255,255,255,.06); }
-    .logo { font-size:clamp(24px,4vw,32px); font-weight:900; letter-spacing:.02em; color:var(--red); text-decoration:none; text-shadow:0 2px 12px rgba(229,9,20,.35); }
-    .nav nav { display:flex; gap:20px; }
-    .nav nav a { color:#e5e5e5; text-decoration:none; font-size:14px; font-weight:600; transition:color .2s; }
-    .nav nav a:hover { color:#fff; }
-    .live { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:#e5e5e5; }
-    .live i { width:8px; height:8px; border-radius:50%; background:var(--red); animation:blink 1.6s ease-in-out infinite; }
-
-    /* ===== Portada ===== */
+    /* ===== Barra superior ===== */
+    .nav { position:fixed; top:0; left:0; right:0; z-index:20; padding:calc(14px + env(safe-area-inset-top,0px)) var(--safe-x) 14px; isolation:isolate;
+      background:linear-gradient(180deg,rgba(0,0,0,.85),transparent); }
+    .nav::before { content:""; position:absolute; inset:0; z-index:-1; background:rgba(11,11,14,.96); box-shadow:0 1px 0 rgba(255,255,255,.06); opacity:0; }
+    .logo { font-size:clamp(24px,4vw,32px); font-weight:900; letter-spacing:.02em; color:var(--red); text-decoration:none; }
+/* ===== Portada ===== */
     .hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end; overflow:hidden; padding:120px var(--safe-x) clamp(56px,10vh,110px); }
     .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:saturate(.85) brightness(.55); transform:scale(1.04); animation:drift 40s ease-in-out infinite alternate; }
     @keyframes drift { from { transform:scale(1.04); } to { transform:scale(1.1); } }
@@ -36,8 +31,7 @@
     .txt { max-width:600px; animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
     @keyframes blink { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.25; transform:scale(.7); } }
-    .tag { display:inline-block; margin-bottom:14px; padding:4px 10px; border-radius:4px; background:var(--red); font-size:12px; font-weight:800; letter-spacing:.04em; }
-    h1 { margin:0 0 14px; font-size:clamp(64px,14vw,132px); font-weight:900; line-height:.92; letter-spacing:-.045em; text-shadow:0 6px 30px rgba(0,0,0,.6); }
+    h1 { margin:0 0 14px; font-size:clamp(40px,8vw,84px); font-weight:900; line-height:1; letter-spacing:-.04em; text-shadow:0 6px 30px rgba(0,0,0,.6); }
     .lead { margin:0 0 22px; max-width:46ch; font-size:clamp(16px,2.4vw,20px); line-height:1.45; color:#e8e8ea; text-shadow:0 2px 12px rgba(0,0,0,.8); }
     .sub { margin:0 0 8px; font-size:13px; font-weight:600; color:var(--muted); }
     .url { display:block; width:100%; max-width:480px; margin:0 0 16px; padding:11px 14px; border-radius:6px; border:1px solid rgba(255,255,255,.16);
@@ -61,34 +55,48 @@
       margin:0 calc(var(--safe-x) * -1); padding:10px var(--safe-x) 30px; }
     .stack::-webkit-scrollbar { display:none; }
     .poster { position:relative; flex:none; width:clamp(124px,19vw,210px); aspect-ratio:2/3; border-radius:6px; overflow:hidden; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:flex-end;
-      padding:12px; transition:transform .3s ease, box-shadow .3s ease; cursor:default; }
+      padding:12px; transition:scale .3s ease, opacity .3s ease, box-shadow .3s ease; cursor:default; }
+    .poster small { position:relative; z-index:2; display:block; margin-top:4px; line-height:1.3; color:#d6d6da; max-height:0; opacity:0; overflow:hidden; transition:max-height .3s ease, opacity .3s ease; }
+    @media (hover:hover) { .poster:hover small { max-height:3.2em; opacity:1; } }
+    @media (hover:none) { .poster small { max-height:none; opacity:1; } }
     .poster img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease, transform .6s ease; }
     .poster.has-img img { opacity:1; }
     .poster.has-img .e { display:none; }
     .poster::after { content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.9)); }
     .poster .e { position:absolute; top:36%; left:0; right:0; text-align:center; font-size:44px; transform:translateY(-50%); z-index:1; }
     .poster b { position:relative; z-index:2; font-size:clamp(14px,1.6vw,17px); line-height:1.2; }
-    @media (hover:hover) { .poster:hover { transform:scale(1.08); z-index:5; box-shadow:0 18px 40px rgba(0,0,0,.7); } .poster:hover img { transform:scale(1.06); } }
+    @media (hover:hover) { .poster:hover { scale:1.08; z-index:5; box-shadow:0 18px 40px rgba(0,0,0,.7); } .poster:hover img { transform:scale(1.06); } }
     .g1 { background:linear-gradient(160deg,#f59e0b,#2a1705); } .g2 { background:linear-gradient(160deg,#e50914,#2a0508); }
     .g3 { background:linear-gradient(160deg,#7c3aed,#12081f); } .g4 { background:linear-gradient(160deg,#0ea5e9,#06141f); }
     .g5 { background:linear-gradient(160deg,#10b981,#052a1d); } .g6 { background:linear-gradient(160deg,#1db954,#06210f); }
 
-    /* ===== Acerca de (mosaicos tipo Spotify) ===== */
-    .about { position:relative; z-index:3; padding:10px var(--safe-x) 60px; max-width:calc(1280px + 2 * var(--safe-x)); margin:0 auto; }
-    .about h2 { margin:0 0 14px; font-size:clamp(18px,2.4vw,24px); font-weight:700; }
-    .tiles { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
-    .tile { display:flex; align-items:center; gap:16px; padding:16px; border-radius:8px; background:rgba(255,255,255,.07); transition:background .25s; }
-    .tile:hover { background:rgba(255,255,255,.13); }
-    .tile .ico { flex:none; width:56px; height:56px; border-radius:6px; display:grid; place-items:center; font-size:26px; }
-    .tile b { display:block; font-size:15px; margin-bottom:3px; }
-    .tile span { font-size:13px; line-height:1.4; color:var(--muted); }
+    /* ===== Técnicas modernas (scroll-driven, @property, :has, container queries) ===== */
+      /* Animaciones ligadas al scroll (sin JavaScript) */
+      @supports (animation-timeline: scroll()) {
+        .nav::before { animation:navbg linear both; animation-timeline:scroll(root); animation-range:0 140px; }
+      }
+      @keyframes navbg { to { opacity:1; } }
+      @supports (animation-timeline: view()) {
+        .poster { animation:enter linear both; animation-timeline:view(inline); animation-range:entry 0% entry 100%; }
+      }
+      @keyframes enter { from { opacity:.25; scale:.9; } }
+      /* Resplandor animado con @property */
+      @property --glow { syntax:'<percentage>'; inherits:false; initial-value:70%; }
+      @keyframes glow { to { --glow:95%; } }
+      .hero::before { background:linear-gradient(90deg,rgba(11,11,14,.92) 0%,rgba(11,11,14,.55) 45%,transparent 80%),
+          linear-gradient(180deg,transparent 55%,var(--bg) 100%), radial-gradient(ellipse at var(--glow) 30%,rgba(229,9,20,.2),transparent 55%);
+        animation:glow 14s ease-in-out infinite alternate; }
+      h1, .lead { text-wrap:balance; }
+      /* Al pasar sobre una tarjeta, las demás se atenúan */
+      .stack:has(.poster:hover) .poster:not(:hover) { opacity:.5; }
+      /* Textos de tarjeta proporcionales a su ancho */
+      .poster { container-type:inline-size; }
+      .poster b { font-size:max(14px,9cqi); }
+      .poster small { font-size:max(12px,6.5cqi); }
 
     /* ===== Pie de página ===== */
     .foot { position:relative; z-index:3; border-top:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02); }
     .foot-in { max-width:1180px; margin:0 auto; padding:40px var(--safe-x) 30px; display:grid; gap:30px; justify-items:center; text-align:center; }
-    .foot-brand { display:flex; align-items:center; gap:12px; font-weight:800; font-size:19px; letter-spacing:-.01em; }
-    .mark { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; font-size:17px; font-weight:800;
-      background:linear-gradient(135deg,var(--red),var(--red-hover)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
     .foot-col h2 { margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
     .social { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
     .social:empty { display:none; }
@@ -106,9 +114,10 @@
     .pais { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 5px; border-radius:999px; font-size:11.5px; font-weight:600; color:#e8e8ea;
       background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); }
     .pais img { display:block; width:18px; height:13px; border-radius:2px; object-fit:cover; }
-    .foot-bar { border-top:1px solid rgba(255,255,255,.06); padding:16px var(--safe-x) calc(18px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:12px; color:var(--muted); }
+    .foot-bar time { font-variant-numeric:tabular-nums; text-transform:capitalize; }
+    .foot-bar { display:flex; flex-wrap:wrap; justify-content:center; gap:6px 24px; border-top:1px solid rgba(255,255,255,.06); padding:16px var(--safe-x) calc(18px + env(safe-area-inset-bottom,0px)); text-align:center; font-size:12px; color:var(--muted); }
     @media (min-width:760px) {
-      .foot-in { grid-template-columns:1fr auto auto; justify-items:start; text-align:left; align-items:center; gap:56px; }
+      .foot-in { grid-template-columns:1fr auto; justify-items:start; text-align:left; align-items:center; gap:56px; }
       .social { justify-content:flex-start; } .visitas { align-items:flex-start; } .paises { justify-content:flex-start; }
     }
     .ic { flex: none; }
@@ -121,24 +130,19 @@
     @keyframes rip { to { transform: scale(1); opacity: 0; } }
 
     @keyframes float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
-    @media (prefers-reduced-motion:reduce) { .bg, .live i, .badge i, .txt { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .bg, .badge i, .txt, .hero::before, .poster, .nav::before { animation:none; } }
   </style>
 </head>
 <body>
   <canvas id="dots" aria-hidden="true"></canvas>
-  <header class="nav" id="nav">
-    <a class="logo" href="#">ZYMAR</a>
-    <nav><a href="#catalogo">Catálogo</a><a href="#info">Acerca de</a></nav>
-    <span class="live"><i></i>En línea</span>
-  </header>
+  <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a></header>
   <main>
     <section class="hero">
       <div class="bg" aria-hidden="true"></div>
       <div class="grid">
         <div class="txt">
-          <span class="tag">Entretenimiento</span>
-          <h1>Zymar</h1>
-          <p class="lead">Radio, TV en vivo, películas, series, documentales y música. Todo reunido en un solo lugar.</p>
+          <h1>Todo el entretenimiento en un solo lugar</h1>
+          <p class="lead">Elige qué ver o escuchar hoy.</p>
           <p class="sub">Copia el enlace y pégalo en tu navegador (mejor en incógnito)</p>
           <code class="url" id="url"></code>
           <div class="acts">
@@ -152,34 +156,29 @@
     <section class="row" id="catalogo">
       <h2>Explora el catálogo</h2>
       <div class="stack" role="list" aria-label="Categorías">
-        <div class="poster g1" role="listitem" data-img="radio"><span class="e">📻</span><b>Radio</b></div>
-        <div class="poster g2" role="listitem" data-img="tv"><span class="e">📡</span><b>TV en vivo</b></div>
-        <div class="poster g3" role="listitem" data-img="peliculas"><span class="e">🎬</span><b>Películas</b></div>
-        <div class="poster g4" role="listitem" data-img="series"><span class="e">📺</span><b>Series</b></div>
-        <div class="poster g5" role="listitem" data-img="documentales"><span class="e">🌍</span><b>Documentales</b></div>
-        <div class="poster g6" role="listitem" data-img="musica"><span class="e">🎵</span><b>Música</b></div>
+        <div class="poster g1" role="listitem" data-img="radio"><span class="e">📻</span><b>Radio</b><small>Emisoras en directo</small></div>
+        <div class="poster g2" role="listitem" data-img="tv"><span class="e">📡</span><b>TV en vivo</b><small>Canales para ver ahora</small></div>
+        <div class="poster g3" role="listitem" data-img="peliculas"><span class="e">🎬</span><b>Películas</b><small>Para ver cuando quieras</small></div>
+        <div class="poster g4" role="listitem" data-img="series"><span class="e">📺</span><b>Series</b><small>Temporadas completas</small></div>
+        <div class="poster g5" role="listitem" data-img="documentales"><span class="e">🌍</span><b>Documentales</b><small>Historias reales</small></div>
+        <div class="poster g6" role="listitem" data-img="musica"><span class="e">🎵</span><b>Música</b><small>Listas y artistas</small></div>
       </div>
     </section>
-    <section class="about" id="info">
-      <h2>Qué es Zymar</h2>
-      <div class="tiles">
-        <div class="tile"><div class="ico g2">📡</div><div><b>En vivo</b><span>Canales y radios para ver y escuchar en el momento.</span></div></div>
-        <div class="tile"><div class="ico g3">🎬</div><div><b>Cuando quieras</b><span>Películas, series y documentales para elegir a tu ritmo.</span></div></div>
-        <div class="tile"><div class="ico g6">🎵</div><div><b>En cualquier pantalla</b><span>Entra desde el celular, la tablet o la computadora.</span></div></div>
-      </div>
-    </section>
-  </main>
+    </main>
   <footer class="foot">
     <div class="foot-in">
-      <div class="foot-brand"><span class="mark">Z</span><span>Zymar</span></div>
       <div class="foot-col col-redes"><h2>Síguenos</h2><div class="social" id="social"></div></div>
       <div class="foot-col"><div class="visitas" id="visitas" hidden><span class="badge"><i></i><b id="vtotal">0</b>&nbsp;visitantes</span><div class="paises" id="paises"></div></div></div>
     </div>
-    <div class="foot-bar">© <span id="yr"></span> Zymar</div>
+    <div class="foot-bar"><span>© <span id="yr"></span> Zymar. Todos los derechos reservados.</span><time id="reloj" aria-live="off"></time></div>
   </footer>
   <script>
-    (function(){var n=document.getElementById('nav');function f(){n.classList.toggle('solid',window.scrollY>40);}addEventListener('scroll',f,{passive:true});f();})();
-    document.getElementById('yr').textContent = new Date().getFullYear();
+    (function () {
+      var fmt = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      var yr = document.getElementById('yr'), rl = document.getElementById('reloj');
+      function tick() { var d = new Date(); yr.textContent = d.getFullYear(); rl.dateTime = d.toISOString(); rl.textContent = fmt.format(d); }
+      tick(); setInterval(tick, 1000);
+    })();
     document.addEventListener('DOMContentLoaded', function () { if (!document.getElementById('social').children.length) document.querySelector('.col-redes').hidden = true; });
     // Imágenes de las tarjetas: cambia aquí cualquier URL por la tuya (JPG/PNG/WebP). Si una falla, se ve el degradado con ícono.
     // Fotos gratuitas de Unsplash (licencia Unsplash). Los parámetros w, h y fit=crop las recortan al tamaño de la tarjeta.
