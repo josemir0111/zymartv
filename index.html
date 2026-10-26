@@ -21,10 +21,10 @@
     .logo { font-size:clamp(24px,4vw,32px); font-weight:900; letter-spacing:.02em; color:var(--red); text-decoration:none; }
 /* ===== Portada ===== */
     .hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end; overflow:hidden; padding:120px var(--safe-x) clamp(56px,10vh,110px); }
-    .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:saturate(.85) brightness(.55); transform:scale(1.04); animation:drift 40s ease-in-out infinite alternate; }
-    @keyframes drift { from { transform:scale(1.04); } to { transform:scale(1.1); } }
+    .bg { position:absolute; inset:0; z-index:0; background:#000 center / cover no-repeat; filter:blur(6px) saturate(.7) brightness(.36); transform:scale(1.08); animation:drift 40s ease-in-out infinite alternate; }
+    @keyframes drift { from { transform:scale(1.08); } to { transform:scale(1.14); } }
     .hero::before { content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-      background:linear-gradient(90deg,rgba(11,11,14,.92) 0%,rgba(11,11,14,.55) 45%,transparent 80%),
+      background:linear-gradient(90deg,rgba(11,11,14,.95) 0%,rgba(11,11,14,.7) 45%,transparent 80%),
                  linear-gradient(180deg,transparent 55%,var(--bg) 100%),
                  radial-gradient(ellipse at 85% 30%,rgba(229,9,20,.16),transparent 55%); }
     .grid { position:relative; z-index:3; width:100%; max-width:1280px; margin:0 auto; }
@@ -70,20 +70,23 @@
     .g3 { background:linear-gradient(160deg,#7c3aed,#12081f); } .g4 { background:linear-gradient(160deg,#0ea5e9,#06141f); }
     .g5 { background:linear-gradient(160deg,#10b981,#052a1d); } .g6 { background:linear-gradient(160deg,#1db954,#06210f); }
 
-    /* ===== Contador de visitantes (protagonista) ===== */
-    .stats { position:relative; z-index:3; padding:0 var(--safe-x); margin-top:-40px; }
-    .visitas { max-width:820px; margin:0 auto 56px; padding:clamp(28px,5vw,48px) 20px; text-align:center; border-radius:24px; border:1px solid rgba(255,255,255,.12);
-      background:radial-gradient(ellipse at 50% 0%,rgba(229,9,20,.28),transparent 65%),rgba(255,255,255,.04);
-      -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(229,9,20,.12); }
+    /* ===== Contador de visitantes (compacto, arriba y centrado) ===== */
+    .nav { display:flex; align-items:center; justify-content:space-between; }
+    .visitas { position:relative; margin-left:auto; outline:none; }
     .visitas[hidden] { display:none; }
-    .stat-label { display:inline-flex; align-items:center; gap:10px; margin:0 0 6px; font-size:clamp(14px,2vw,17px); font-weight:700; color:#e8e8ea; }
-    .stat-label i { width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,.22); animation:blink 1.8s ease-in-out infinite; }
-    .stat-num { display:block; font-size:clamp(64px,16vw,150px); font-weight:900; line-height:1; letter-spacing:-.045em; font-variant-numeric:tabular-nums;
-      background:linear-gradient(180deg,#fff 30%,#ff8a93); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 8px 30px rgba(229,9,20,.45)); }
-    .paises { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:18px; }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding:7px 14px 7px 12px; border-radius:999px; font-size:12px; font-weight:600; color:#cfcfd4; white-space:nowrap; cursor:default;
+      background:rgba(20,20,24,.72); border:1px solid rgba(255,255,255,.2); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+      box-shadow:0 0 0 1px rgba(229,9,20,.3),0 6px 24px rgba(0,0,0,.5),0 0 24px rgba(229,9,20,.28); transition:box-shadow .25s; }
+    .visitas:hover .pill, .visitas:focus-visible .pill { box-shadow:0 0 0 1px rgba(229,9,20,.6),0 6px 24px rgba(0,0,0,.5),0 0 32px rgba(229,9,20,.5); }
+    .pill i { width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.22); animation:blink 1.8s ease-in-out infinite; }
+    .pill b { font-size:17px; font-weight:900; color:#fff; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .paises { position:absolute; top:calc(100% + 8px); right:0; z-index:30; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; width:max-content; max-width:min(92vw,380px); padding:10px; border-radius:14px;
+      background:rgba(14,14,18,.94); border:1px solid rgba(255,255,255,.12); box-shadow:0 16px 40px rgba(0,0,0,.6); opacity:0; visibility:hidden; transform:translateY(-4px); transition:opacity .2s, transform .2s, visibility .2s; }
     .paises:empty { display:none; }
-    .pais { display:inline-flex; align-items:center; gap:7px; padding:5px 12px 5px 8px; border-radius:999px; font-size:14px; font-weight:700; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); }
-    .pais img { display:block; width:22px; height:16px; border-radius:2px; object-fit:cover; }
+    .visitas:hover .paises, .visitas:focus-within .paises, .visitas:focus .paises { opacity:1; visibility:visible; transform:none; }
+    .pais { display:inline-flex; align-items:center; gap:6px; padding:4px 10px 4px 6px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); }
+    .pais img { display:block; width:20px; height:14px; border-radius:2px; object-fit:cover; }
+    @media (min-width:700px) { .visitas { position:absolute; left:50%; top:calc(10px + env(safe-area-inset-top,0px)); margin:0; transform:translateX(-50%); } .paises { right:auto; left:50%; margin-left:0; translate:-50% 0; } }
 
     /* ===== Carrusel ===== */
     .car { position:relative; }
@@ -107,7 +110,7 @@
       /* Resplandor animado con @property */
       @property --glow { syntax:'<percentage>'; inherits:false; initial-value:70%; }
       @keyframes glow { to { --glow:95%; } }
-      .hero::before { background:linear-gradient(90deg,rgba(11,11,14,.92) 0%,rgba(11,11,14,.55) 45%,transparent 80%),
+      .hero::before { background:linear-gradient(90deg,rgba(11,11,14,.95) 0%,rgba(11,11,14,.7) 45%,transparent 80%),
           linear-gradient(180deg,transparent 55%,var(--bg) 100%), radial-gradient(ellipse at var(--glow) 30%,rgba(229,9,20,.2),transparent 55%);
         animation:glow 14s ease-in-out infinite alternate; }
       h1, .lead { text-wrap:balance; }
@@ -145,12 +148,14 @@
     @keyframes rip { to { transform: scale(1); opacity: 0; } }
 
     @keyframes float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
-    @media (prefers-reduced-motion:reduce) { .bg, .stat-label i, .txt, .hero::before, .poster, .nav::before { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .bg, .pill i, .txt, .hero::before, .poster, .nav::before { animation:none; } }
   </style>
 </head>
 <body>
   <canvas id="dots" aria-hidden="true"></canvas>
-  <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a></header>
+  <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a>
+    <div class="visitas" id="visitas" tabindex="0" hidden aria-label="Visitantes únicos"><span class="pill"><i></i><b id="vtotal">0</b><span>visitantes</span></span><div class="paises" id="paises"></div></div>
+  </header>
   <main>
     <section class="hero">
       <div class="bg" aria-hidden="true"></div>
@@ -166,13 +171,6 @@
           </div>
           <div id="ok" role="status" aria-live="polite"></div>
         </div>
-      </div>
-    </section>
-    <section class="stats" aria-label="Visitantes">
-      <div class="visitas" id="visitas" hidden>
-        <p class="stat-label"><i></i>Visitantes únicos</p>
-        <b class="stat-num" id="vtotal">0</b>
-        <div class="paises" id="paises"></div>
       </div>
     </section>
     <section class="row" id="catalogo">
