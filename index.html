@@ -218,6 +218,19 @@
       .acts { justify-content:flex-start; }
       .shot { justify-self:center; margin:0 auto; }
     }
+  
+    /* Pantallas muy pequeñas: el texto y los botones no deben tocar la imagen */
+    @media (max-width:420px) {
+      .hero { padding-left:12px; padding-right:12px; }
+      .grid { grid-template-columns:minmax(0,1fr) clamp(84px,27vw,124px); gap:14px; }
+      .txt { min-width:0; }
+      .shot { max-width:100%; }
+      .acts { gap:5px; }
+      .btn { min-width:0; flex:0 1 auto; padding:7px 9px; font-size:11px; }
+      .btn .ic { display:none !important; }
+      .btn span { overflow:hidden; text-overflow:ellipsis; }
+      .url { font-size:9px; }
+    }
   </style>
 </head>
 <body>
