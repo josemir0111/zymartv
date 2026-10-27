@@ -4,7 +4,13 @@
   <meta charset="utf-8">
   <title>Zymar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#141414">
+  <meta name="theme-color" content="#0b0b0e">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zymar">
+  <meta name="format-detection" content="telephone=no">
   <style>
     :root { --bg:#0b0b0e; --red:#e50914; --red-hover:#f40612; --red-soft:#ff5a67; --text:#fff; --muted:#b4b8c4; --safe-x:clamp(20px,5vw,72px); }
     * { box-sizing:border-box; }
@@ -29,13 +35,14 @@
                  linear-gradient(180deg,transparent 55%,var(--bg) 100%),
                  radial-gradient(ellipse at 85% 30%,rgba(229,9,20,.16),transparent 55%); }
     .grid { position:relative; z-index:3; width:100%; max-width:1280px; margin:0 auto; display:grid; gap:clamp(12px,3vw,56px); align-items:center; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); }
-    .shot { margin:0; justify-self:end; width:100%; max-width:min(460px,68svh); padding:clamp(5px,1.2vw,10px); border-radius:24px; position:relative;
-      background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.04) 55%,rgba(229,9,20,.18)); border:1px solid rgba(255,255,255,.22);
-      box-shadow:0 30px 70px rgba(0,0,0,.7),0 0 60px rgba(229,9,20,.32),inset 0 1px 0 rgba(255,255,255,.3);
-      -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); animation:float 7s ease-in-out infinite; }
+    /* Celular con la imagen dentro de la pantalla */
+    .shot { margin:0; justify-self:center; position:relative; width:100%; max-width:min(250px,38svh); aspect-ratio:9/18.5; padding:3.2%; border-radius:15% / 7.4%;
+      background:linear-gradient(145deg,#3d3d45,#0d0d10 60%,#1d1d23); border:1px solid rgba(255,255,255,.28);
+      box-shadow:0 30px 70px rgba(0,0,0,.75),0 0 60px rgba(229,9,20,.35),inset 0 0 0 2px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.35); animation:float 7s ease-in-out infinite; }
     .shot[hidden] { display:none; }
-    .shot::after { content:""; position:absolute; inset:10px; border-radius:15px; pointer-events:none; box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 -40px 60px -30px rgba(0,0,0,.45); }
-    .shot img { display:block; width:100%; aspect-ratio:1/1; object-fit:contain; object-position:center; background:rgba(0,0,0,.3); border-radius:15px; filter:saturate(1.1) contrast(1.05) drop-shadow(0 10px 24px rgba(0,0,0,.5)); }
+    .shot::before { content:""; position:absolute; right:-3px; top:24%; width:3px; height:11%; border-radius:0 2px 2px 0; background:#3d3d45; }
+    .shot::after { content:""; position:absolute; z-index:2; top:3.6%; left:50%; translate:-50% 0; width:28%; height:2.3%; border-radius:99px; background:#000; box-shadow:0 0 0 1px rgba(255,255,255,.06); }
+    .shot img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; border-radius:12% / 5.9%; background:#000; filter:saturate(1.05) contrast(1.03); }
     
     .txt { max-width:540px; animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
@@ -162,6 +169,15 @@
     @keyframes float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
     @media (prefers-reduced-motion:reduce) { .bg, .pill i, .txt, .hero::before, .poster, .nav::before, .shot { animation:none; } }
   
+    /* Comportamiento tipo app móvil */
+    html { -webkit-text-size-adjust:100%; text-size-adjust:100%; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none; scroll-behavior:smooth; }
+    body { min-height:100vh; min-height:100dvh; }
+    a, button { touch-action:manipulation; }
+    .btn, .poster, .logo, .pill, .car-btn { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+    .stack { overscroll-behavior-x:contain; }
+    @media (hover:none) { .stack { scroll-snap-type:x mandatory; } .btn:active, .poster:active { scale:.97; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+
     /* Ajustes para pantallas pequeñas (al final para que tengan prioridad) */
     @media (max-width:600px) {
       .hero { padding:84px 14px 28px; }
@@ -171,7 +187,6 @@
       .url { font-size:10px; padding:8px 10px; margin-bottom:10px; }
       .btn { padding:7px 10px; font-size:12px; gap:5px; } .btn .ic { width:14px; height:14px; }
       .acts { gap:6px; }
-      .shot { border-radius:16px; } .shot img, .shot::after { border-radius:11px; }
     }
     /* Celular en horizontal: poca altura, todo se compacta y respeta el notch */
     @media (orientation:landscape) and (max-height:520px) {
@@ -182,7 +197,7 @@
       .sub { font-size:11px; margin-bottom:6px; }
       .url { font-size:10px; padding:7px 10px; margin-bottom:8px; }
       .btn { padding:7px 12px; font-size:12px; }
-      .shot { max-width:min(300px,64svh); }
+      .shot { max-width:min(170px,42svh); }
       .row { padding-left:max(var(--safe-x),env(safe-area-inset-left,0px)); padding-right:max(var(--safe-x),env(safe-area-inset-right,0px)); }
       .poster { width:clamp(96px,16vw,130px); }
       .pill { padding:5px 11px 5px 9px; }
@@ -493,7 +508,7 @@
 
     // Imagen a la derecha de la portada (Dropbox). Si no carga, simplemente no se muestra.
     (function () {
-      var base = 'https://www.dropbox.com/scl/fi/8ydk715v83b90q2zchrq2/Gemini_Generated_Image_jclzezjclzezjclz.png?rlkey=vj9uj4r0zg7ay12bnqugn09jk&st=2317lx2r';
+      var base = 'https://www.dropbox.com/scl/fi/0abado93n8g2luhf1vvob/358306.jpg?rlkey=nqh8mkuq1v91pg5ud8knih28e&st=sqcfyb9a';
       var cand = [base + '&raw=1', base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0, im = document.getElementById('navimg'), box = document.getElementById('shot');
       function probar() {
         if (i >= cand.length) return;
