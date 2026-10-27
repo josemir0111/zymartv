@@ -188,14 +188,13 @@
       .pill { padding:5px 11px 5px 9px; }
     }
   
-    /* Móvil (vertical y horizontal): todo centrado, texto e imagen lado a lado */
+    /* Móvil (vertical y horizontal): texto a la izquierda, imagen centrada en su columna */
     @media (max-width:600px), (orientation:landscape) and (max-height:520px) {
       .hero { justify-content:center; }
       .grid { justify-items:center; align-items:center; margin:0 auto; }
-      .txt { text-align:center; margin:0 auto; }
-      .lead { margin-left:auto; margin-right:auto; }
-      .url { margin-left:auto; margin-right:auto; text-align:left; }
-      .acts { justify-content:center; }
+      .txt { text-align:left; justify-self:start; margin:0; }
+      .lead, .url { margin-left:0; margin-right:0; }
+      .acts { justify-content:flex-start; }
       .shot { justify-self:center; margin:0 auto; }
     }
   </style>
