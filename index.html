@@ -17,6 +17,9 @@
     /* ===== Barra superior ===== */
     .nav { position:fixed; top:0; left:0; right:0; z-index:20; padding:calc(14px + env(safe-area-inset-top,0px)) var(--safe-x) 14px; isolation:isolate;
       background:linear-gradient(180deg,rgba(0,0,0,.85),transparent); }
+    .logo img { display:block; height:clamp(38px,6vw,54px); width:auto; max-width:60vw; transition:transform .3s ease, filter .3s ease;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.7)) drop-shadow(0 6px 16px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(229,9,20,.45)); }
+    .logo:hover img { transform:scale(1.05); filter:drop-shadow(0 2px 3px rgba(0,0,0,.7)) drop-shadow(0 8px 20px rgba(0,0,0,.6)) drop-shadow(0 0 28px rgba(229,9,20,.7)); }
     .nav::before { content:""; position:absolute; inset:0; z-index:-1; background:rgba(11,11,14,.96); box-shadow:0 1px 0 rgba(255,255,255,.06); opacity:0; }
     .logo { font-size:clamp(26px,4.2vw,34px); font-weight:900; letter-spacing:.1em; color:#fff; text-decoration:none;
       text-shadow:0 2px 3px rgba(0,0,0,.7),0 6px 16px rgba(0,0,0,.6),0 0 26px rgba(229,9,20,.4); }
@@ -156,7 +159,7 @@
 </head>
 <body>
   <canvas id="dots" aria-hidden="true"></canvas>
-  <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a>
+  <header class="nav" id="nav"><a class="logo" href="#" aria-label="Zymar"><img id="logoimg" alt="" hidden><span id="logotxt">ZYMAR</span></a>
     <div class="visitas" id="visitas" tabindex="0" hidden aria-label="Visitantes únicos"><span class="pill"><i></i><span class="mini" id="mini"></span><b id="vtotal">0</b><span>visitantes</span></span><div class="paises" id="paises"></div></div>
   </header>
   <main>
@@ -441,6 +444,20 @@
         img.onload = function () { bg.style.backgroundImage = 'url("' + u + '")'; };
         img.onerror = probar;
         img.src = u;
+      }
+      probar();
+    })();
+
+    // Logo (Dropbox). Si no carga, se queda el texto ZYMAR.
+    (function () {
+      var base = 'https://www.dropbox.com/scl/fi/flycw1mqooc08w8zka4lj/Gemini_Generated_Image_4l3g2n4l3g2n4l3g-removebg-preview.png?rlkey=67xnn7iqt252f8mgxev5nly90&st=0e1zu51p';
+      var cand = [base + '&raw=1', base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0;
+      var im = document.getElementById('logoimg'), tx = document.getElementById('logotxt');
+      function probar() {
+        if (i >= cand.length) return;
+        var u = cand[i++], t = new Image();
+        t.onload = function () { im.src = u; im.hidden = false; tx.hidden = true; };
+        t.onerror = probar; t.src = u;
       }
       probar();
     })();
