@@ -42,7 +42,9 @@
     .shot[hidden] { display:none; }
     .shot::before { content:""; position:absolute; right:-3px; top:24%; width:3px; height:11%; border-radius:0 2px 2px 0; background:#3d3d45; }
     .shot::after { content:""; position:absolute; z-index:2; top:3.6%; left:50%; translate:-50% 0; width:28%; height:2.3%; border-radius:99px; background:#000; box-shadow:0 0 0 1px rgba(255,255,255,.06); }
-    .shot img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; border-radius:12% / 5.9%; background:#000; filter:saturate(1.05) contrast(1.03); }
+    .screen { position:relative; width:100%; height:100%; overflow:hidden; border-radius:12% / 5.9%; background:#000; }
+    .screen img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:contain; object-position:center; }
+    .screen .fill { object-fit:cover; transform:scale(1.2); filter:blur(18px) brightness(.5) saturate(1.2); }
     
     .txt { max-width:540px; animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
@@ -234,7 +236,7 @@
           </div>
           <div id="ok" role="status" aria-live="polite"></div>
         </div>
-        <figure class="shot" id="shot" hidden><img id="navimg" alt=""></figure>
+        <figure class="shot" id="shot" hidden><div class="screen"><img class="fill" id="navfill" alt="" aria-hidden="true"><img id="navimg" alt=""></div></figure>
       </div>
     </section>
     <section class="row" id="catalogo">
@@ -509,11 +511,11 @@
     // Imagen a la derecha de la portada (Dropbox). Si no carga, simplemente no se muestra.
     (function () {
       var base = 'https://www.dropbox.com/scl/fi/0abado93n8g2luhf1vvob/358306.jpg?rlkey=nqh8mkuq1v91pg5ud8knih28e&st=sqcfyb9a';
-      var cand = [base + '&raw=1', base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0, im = document.getElementById('navimg'), box = document.getElementById('shot');
+      var cand = [base + '&raw=1', base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0, im = document.getElementById('navimg'), fill = document.getElementById('navfill'), box = document.getElementById('shot');
       function probar() {
         if (i >= cand.length) return;
         var u = cand[i++], t = new Image();
-        t.onload = function () { im.src = u; box.hidden = false; };
+        t.onload = function () { im.src = u; fill.src = u; box.hidden = false; };
         t.onerror = probar; t.src = u;
       }
       probar();
