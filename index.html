@@ -219,17 +219,20 @@
       .shot { justify-self:center; margin:0 auto; }
     }
   
-    /* Pantallas muy pequeñas: el texto y los botones no deben tocar la imagen */
+    /* Pantallas muy pequeñas: el celular mantiene su tamaño; se achican la letra y los botones */
     @media (max-width:420px) {
       .hero { padding-left:12px; padding-right:12px; }
-      .grid { grid-template-columns:minmax(0,1fr) clamp(84px,27vw,124px); gap:14px; }
+      .grid { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:12px; }
       .txt { min-width:0; }
       .shot { max-width:100%; }
-      .acts { gap:5px; }
-      .btn { min-width:0; flex:0 1 auto; padding:7px 9px; font-size:11px; }
+      h1 { font-size:clamp(15px,5.2vw,21px); line-height:1.12; margin-bottom:8px; }
+      .lead { font-size:clamp(10.5px,3.2vw,13px); margin-bottom:10px; }
+      .sub { font-size:clamp(9px,2.7vw,11px); margin-bottom:5px; }
+      .url { font-size:clamp(8px,2.4vw,9.5px); padding:6px 8px; margin-bottom:8px; }
+      .acts { gap:4px; }
+      .btn { min-width:0; flex:0 1 auto; padding:6px 8px; font-size:clamp(9.5px,2.9vw,11px); }
       .btn .ic { display:none !important; }
       .btn span { overflow:hidden; text-overflow:ellipsis; }
-      .url { font-size:9px; }
     }
   </style>
 </head>
