@@ -11,6 +11,21 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Zymar">
   <meta name="format-detection" content="telephone=no">
+  <link rel="preconnect" href="https://wsrv.nl">
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="dns-prefetch" href="https://abacus.jasoncameron.dev">
+  <script>
+    // Detecta TV, equipos lentos o ahorro de datos y activa el modo ligero.
+    // Se puede forzar con ?tv=1 o ?lite=1, y desactivar el modo ligero (fuera de TV) con ?lite=0
+    (function () {
+      var d = document.documentElement, ua = navigator.userAgent || '', q = location.search, c = navigator.connection || {};
+      var tv = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|BRAVIA|HbbTV|AFTM|Android ?TV|GoogleTV|CrKey|Roku|VIDAA|Viera|Opera TV/i.test(ua) || /[?&]tv=1/.test(q);
+      var lite = tv || /[?&]lite=1/.test(q) || c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '') || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+      if (/[?&]lite=0/.test(q) && !tv) lite = false;
+      if (tv) d.className += ' tv';
+      if (lite) d.className += ' lite';
+    })();
+  </script>
   <style>
     :root { --bg:#0b0b0e; --red:#e50914; --red-hover:#f40612; --red-soft:#ff5a67; --text:#fff; --muted:#b4b8c4; --safe-x:clamp(20px,5vw,72px); }
     * { box-sizing:border-box; }
@@ -75,7 +90,7 @@
     .row { position:relative; z-index:3; margin-top:0; padding:0 var(--safe-x) 20px; }
     .row h2 { margin:0 0 12px; font-size:clamp(18px,2.4vw,24px); font-weight:700; }
     .stack { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x proximity; scroll-padding-left:var(--safe-x); scrollbar-width:none; -webkit-overflow-scrolling:touch;
-      margin:0 calc(var(--safe-x) * -1); padding:10px var(--safe-x) 30px; }
+      margin:0 calc(var(--safe-x) * -1); padding:18px var(--safe-x) 30px; }
     .stack::-webkit-scrollbar { display:none; }
     .poster { position:relative; flex:none; width:clamp(112px,14vw,168px); aspect-ratio:2/3; border-radius:6px; overflow:hidden; scroll-snap-align:start; display:flex; flex-direction:column; justify-content:flex-end;
       padding:12px; transition:scale .3s ease, opacity .3s ease, box-shadow .3s ease; cursor:default; }
@@ -274,6 +289,32 @@
       .btn-info.copied .ic-check { display:block !important; width:15px; height:15px; }
       #ok { min-height:0; margin-top:4px; }
     }
+
+    /* ===== Control remoto de TV: foco bien visible (reglas separadas para que TVs antiguas no las descarten) ===== */
+    .poster:focus { outline:none; }
+    .poster:focus-visible { outline:3px solid #fff; outline-offset:3px; transform:scale(1.05); z-index:5; box-shadow:0 0 0 3px var(--red),0 18px 40px rgba(0,0,0,.7); }
+    .poster:focus-visible small { max-height:3.2em; opacity:1; }
+    .tv a:focus, .tv button:focus { outline:3px solid #fff; outline-offset:3px; box-shadow:0 0 0 3px var(--red); }
+    .tv .poster:focus { outline:3px solid #fff; outline-offset:3px; transform:scale(1.05); z-index:5; box-shadow:0 0 0 3px var(--red),0 18px 40px rgba(0,0,0,.7); }
+    .tv .poster:focus small { max-height:3.2em; opacity:1; }
+    .tv .visitas:focus .pill { box-shadow:0 0 0 3px #fff,0 0 0 6px var(--red); }
+    .tv .visitas:focus .paises { opacity:1; visibility:visible; transform:none; }
+    /* Letra y tarjetas más grandes para verlas desde lejos */
+    .tv .lead { font-size:22px; }
+    .tv .sub { font-size:16px; }
+    .tv .url { font-size:15px; max-width:620px; }
+    .tv .acts { max-width:620px; }
+    .tv .poster { width:clamp(160px,12vw,230px); }
+    .tv .foot-bar { font-size:15px; }
+
+    /* ===== Modo ligero (TV / equipos lentos): sin efectos que cuestan rendimiento ===== */
+    html.lite, html.lite body { scroll-behavior:auto; }
+    html.lite #dots { display:none; }
+    html.lite .bg, html.lite .shot, html.lite .hero::before, html.lite .poster, html.lite .pill i { animation:none; }
+    html.lite .screen .fill { display:none; }
+    html.lite .pill, html.lite .car-btn { -webkit-backdrop-filter:none; backdrop-filter:none; }
+    html.lite .pill { background:rgba(20,20,24,.92); }
+    html.lite .poster { transition:transform .15s ease, opacity .2s ease; }
   </style>
 </head>
 <body>
@@ -356,6 +397,7 @@
     var $ = function (id) { return document.getElementById(id); };
     $('url').textContent = URL_APP;
     $('enter').href = URL_APP;
+    if (document.documentElement.classList.contains('tv')) $('enter').target = '_self';
     var timer;
     function done(ok) {
       var b = $('copy');
@@ -423,7 +465,15 @@
       // Países que se muestran con bandera (código ISO de 2 letras). Los demás igual suman al total.
       paises: ['PE','MX','CO','AR','CL','EC','BO','VE','UY','PY','CR','PA','ES','US','BR','DO']
     };
-    (function () {
+    // Se inicia cuando la página terminó de cargar (o a los 6 s) para no competir con las imágenes por la conexión.
+    function cuandoLibre(fn) {
+      var hecho = false;
+      function go() { if (hecho) return; hecho = true; fn(); }
+      if (document.readyState === 'complete') setTimeout(go, 300);
+      else addEventListener('load', function () { setTimeout(go, 300); });
+      setTimeout(go, 6000);
+    }
+    cuandoLibre(function () {
       var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
       var API = CONTADOR.api + '/', NS = CONTADOR.ns + '/', PAISES = CONTADOR.paises;
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -549,38 +599,49 @@
         lsSet(K_REG, '1');
         return resumen();
       }).then(guardar).catch(function () {});
-    })();
+    });
 
-    // Fondo de pantalla (Dropbox). Si el primer enlace falla, prueba el enlace directo.
+    // Fondo de pantalla (Dropbox). Primero pide una copia reducida en WebP (960 px: mucho más liviana y suficiente,
+    // porque el fondo va desenfocado y oscuro). Si falla, usa los enlaces originales de Dropbox.
+    // Arranca cuando la imagen del celular ya cargó (o a los 2,5 s) para que no compitan entre sí.
     (function () {
       var base = 'https://www.dropbox.com/scl/fi/16lbymfscgsze7lbgp7nc/ChatGPT-Image-13-sept-2026-09_37_47-p.m..png?rlkey=cw8iog21icw665a1b0tjtv101&st=4fykjltk';
+      var raw = base + '&raw=1';
       var candidatos = [
-        base + '&raw=1',
+        'https://wsrv.nl/?url=' + encodeURIComponent(raw) + '&w=960&we&q=60&output=webp',
+        raw,
         base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'),
         base + '&dl=1'
       ];
-      var i = 0, bg = document.querySelector('.bg');
+      var i = 0, bg = document.querySelector('.bg'), iniciado = false;
       function probar() {
         if (i >= candidatos.length) return;
         var u = candidatos[i++], img = new Image();
+        img.decoding = 'async';
         img.onload = function () { bg.style.backgroundImage = 'url("' + u + '")'; };
         img.onerror = probar;
         img.src = u;
       }
-      probar();
+      window.iniciarFondo = function () { if (iniciado) return; iniciado = true; probar(); };
+      setTimeout(window.iniciarFondo, 2500);
     })();
 
-    // Imagen a la derecha de la portada (Dropbox). Si no carga, simplemente no se muestra.
+    // Imagen a la derecha de la portada (Dropbox). Copia reducida primero; si no carga, usa el original o no se muestra.
     (function () {
       var base = 'https://www.dropbox.com/scl/fi/ad7t85s4hmm9z3skskhxh/358308.jpg?rlkey=bjlrwfy1sof3ocdjafk5hg6y2&st=kcnplgc1';
-      var cand = [base + '&raw=1', base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0, im = document.getElementById('navimg'), fill = document.getElementById('navfill'), box = document.getElementById('shot');
+      var raw = base + '&raw=1';
+      var cand = ['https://wsrv.nl/?url=' + encodeURIComponent(raw) + '&w=500&we&q=70&output=webp', raw, base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'], i = 0, im = document.getElementById('navimg'), fill = document.getElementById('navfill'), box = document.getElementById('shot');
+      var lite = document.documentElement.classList.contains('lite');
+      im.decoding = 'async';
       function probar() {
-        if (i >= cand.length) return;
+        if (i >= cand.length) { if (window.iniciarFondo) window.iniciarFondo(); return; }
         var u = cand[i++], t = new Image();
+        t.decoding = 'async'; try { t.fetchPriority = 'high'; } catch (e) {}
         t.onload = function () {
           var r = Math.min(.75, Math.max(.42, t.naturalWidth / t.naturalHeight));
           box.style.aspectRatio = (1 / (.936 / r + .064)).toFixed(4);
-          im.src = u; fill.src = u; box.hidden = false;
+          im.src = u; if (!lite) fill.src = u; box.hidden = false;
+          if (window.iniciarFondo) window.iniciarFondo();
         };
         t.onerror = probar; t.src = u;
       }
@@ -591,7 +652,9 @@
 
     // Puntos animados sobre el fondo (ligero: sin librerías, no usa ancho de banda extra)
     (function () {
-      var c = document.getElementById('dots'), x = c.getContext('2d');
+      var c = document.getElementById('dots');
+      if (document.documentElement.classList.contains('lite')) return;
+      var x = c.getContext('2d');
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       var W, H, P = [], LINK, mx = -9999, my = -9999, raf = 0, t = 0;
@@ -673,7 +736,7 @@
       ['mouseenter', 'focusin', 'touchstart', 'pointerdown'].forEach(function (ev) { car.addEventListener(ev, function () { pausa = true; }, { passive: true }); });
       ['mouseleave', 'focusout'].forEach(function (ev) { car.addEventListener(ev, function () { pausa = false; }); });
       car.addEventListener('touchend', function () { setTimeout(function () { pausa = false; }, 4000); }, { passive: true });
-      if (!reduce) setInterval(function () { if (!pausa && !document.hidden) paso(1); }, 3500);
+      if (!reduce && !document.documentElement.classList.contains('lite')) setInterval(function () { if (!pausa && !document.hidden) paso(1); }, 3500);
       addEventListener('resize', ajustar); addEventListener('load', ajustar); ajustar();
     })();
     // Cuenta animada del contador cuando llega el dato
@@ -691,6 +754,61 @@
         })(t0);
       });
       obs.observe(el, { childList: true });
+    })();
+  </script>
+<script>
+    // Control remoto de TV: flechas para moverse entre botones y tarjetas, OK/Enter para pulsar.
+    // Fuera de una TV solo actúa cuando una tarjeta ya tiene el foco (Tab), así no cambia el scroll normal con flechas.
+    (function () {
+      var de = document.documentElement, tv = de.classList.contains('tv');
+      var DIR = { 37: 'l', 38: 'u', 39: 'r', 40: 'd', ArrowLeft: 'l', ArrowUp: 'u', ArrowRight: 'r', ArrowDown: 'd', Left: 'l', Up: 'u', Right: 'r', Down: 'd' };
+      var listo = false;
+      function habilitar() {
+        if (listo) return; listo = true;
+        Array.prototype.forEach.call(document.querySelectorAll('.poster'), function (p) { p.setAttribute('tabindex', '0'); });
+        var st = document.querySelector('.stack'); if (st) st.setAttribute('tabindex', '-1');
+        if (tv) { var lg = document.querySelector('.logo'); if (lg) lg.setAttribute('tabindex', '-1'); }   // el logo no hace nada: se salta con el control
+      }
+      function enfocables() {
+        return Array.prototype.filter.call(document.querySelectorAll('a[href], button, [tabindex="0"]'), function (el) {
+          if (el.disabled || el.getAttribute('tabindex') === '-1') return false;
+          var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0;
+        });
+      }
+      function ir(el) {
+        try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+        try { el.scrollIntoView({ block: 'center', inline: el.classList.contains('poster') ? 'center' : 'nearest' }); } catch (e) {}
+      }
+      // Busca el elemento más cercano en la dirección pulsada
+      function mover(d) {
+        var cur = document.activeElement, lista = enfocables();
+        if (!cur || cur === document.body || lista.indexOf(cur) < 0) { var p = document.getElementById('enter'); if (p) ir(p); return; }
+        var a = cur.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2, mejor = null, ms = 1e9;
+        lista.forEach(function (el) {
+          if (el === cur) return;
+          var b = el.getBoundingClientRect(), dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay, pr, o;
+          if (d === 'r') { if (dx <= 1 || b.top >= a.bottom || b.bottom <= a.top) return; pr = dx; o = Math.abs(dy); }
+          else if (d === 'l') { if (dx >= -1 || b.top >= a.bottom || b.bottom <= a.top) return; pr = -dx; o = Math.abs(dy); }
+          else if (d === 'd') { if (dy <= 1) return; pr = dy; o = Math.abs(dx); }
+          else { if (dy >= -1) return; pr = -dy; o = Math.abs(dx); }
+          var sc = pr + o * 2.5;
+          if (sc < ms) { ms = sc; mejor = el; }
+        });
+        if (mejor) ir(mejor);
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        var d = DIR[e.key] || DIR[e.keyCode];
+        if (!d && e.key !== 'Tab') return;
+        habilitar();
+        if (!d) return;
+        var ae = document.activeElement;
+        if (!tv && !(ae && ae.classList && ae.classList.contains('poster'))) return;
+        e.preventDefault(); e.stopPropagation();
+        mover(d);
+      }, true);
+      // En TV, el foco empieza en "Entrar" para que OK funcione de inmediato
+      if (tv) { habilitar(); var en = document.getElementById('enter'); if (en) ir(en); }
     })();
   </script>
 </body>
