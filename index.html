@@ -343,10 +343,17 @@
     @keyframes sweep { 0% { background-position:-140% 0,0 0,0 0,0 0; } 55%,100% { background-position:140% 0,0 0,0 0,0 0; } }
     .bg::after { content:""; position:absolute; inset:-10%; pointer-events:none; opacity:.16; mix-blend-mode:overlay;
       background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
-    .hero { box-shadow:inset 0 0 160px 30px rgba(0,0,0,.65); }
     html.lite .bg { animation:none; filter:blur(6px) saturate(1.1) brightness(.45); transform:scale(1.05); }
     html.lite .hero::after, html.lite .bg::after { display:none; }
     @media (prefers-reduced-motion:reduce) { .bg, .hero::after { animation:none; } }
+
+    /* ===== Espacio y transición entre la portada y el catálogo ===== */
+    .bg, .hero::after { -webkit-mask-image:linear-gradient(180deg,#000 68%,transparent 100%); mask-image:linear-gradient(180deg,#000 68%,transparent 100%); }
+    .hero { padding-bottom:72px; }
+    .row { padding-top:32px; padding-bottom:56px; }
+    .row h2 { margin-bottom:6px; }
+    @media (max-width:600px) { .hero { padding-bottom:48px; } .row { padding-top:20px; padding-bottom:40px; } }
+    @media (orientation:landscape) and (max-height:520px) { .hero { padding-bottom:40px; } .row { padding-top:20px; } }
   </style>
 </head>
 <body>
