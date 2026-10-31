@@ -701,10 +701,7 @@
         cargadas.forEach(function (c) {
           if (puestas[c.k]) return;
           puestas[c.k] = true;
-          if (c.k === 0 || !listo) {
-            var r = Math.min(.75, Math.max(.42, c.w / c.h));   // el celular toma la proporción de la primera imagen
-            box.style.aspectRatio = (1 / (.936 / r + .064)).toFixed(4);
-          }
+          // El celular mantiene su forma alargada normal (9:18.5); las fotos se ajustan a la pantalla
           if (!listo) {
             box.hidden = false; listo = true;
             if (window.iniciarFondo) window.iniciarFondo();
