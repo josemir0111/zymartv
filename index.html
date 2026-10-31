@@ -167,7 +167,7 @@
     .slides { position:absolute; inset:0; touch-action:pan-y; }
     .slide { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .7s ease, visibility .7s; }
     .slide.on { opacity:1; visibility:visible; }
-    .slide img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:contain; object-position:center; }
+    .slide img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
     .slide img.fill { object-fit:cover; transform:scale(1.2); filter:blur(18px) brightness(.5) saturate(1.2); }
     .sdots { position:absolute; z-index:3; left:0; right:0; bottom:5.2cqi; display:flex; justify-content:center; gap:1.6cqi; pointer-events:none; }
     .sdots:empty { display:none; }
@@ -673,7 +673,6 @@
       }
       function agregar(u) {
         var el = document.createElement('div'); el.className = 'slide';
-        if (!lite) { var f = new Image(); f.className = 'fill'; f.alt = ''; f.setAttribute('aria-hidden', 'true'); f.src = u; el.appendChild(f); }
         var im = new Image(); im.alt = ''; im.decoding = 'async'; im.src = u; el.appendChild(im);
         var dot = document.createElement('i');
         slides.push({ el: el, dot: dot, idx: slides.length });
@@ -702,9 +701,11 @@
         cargadas.forEach(function (c) {
           if (puestas[c.k]) return;
           puestas[c.k] = true;
-          if (!listo) {
-            var r = Math.min(.75, Math.max(.42, c.w / c.h));   // el celular toma la proporción de la primera imagen cargada
+          if (c.k === 0 || !listo) {
+            var r = Math.min(.75, Math.max(.42, c.w / c.h));   // el celular toma la proporción de la primera imagen
             box.style.aspectRatio = (1 / (.936 / r + .064)).toFixed(4);
+          }
+          if (!listo) {
             box.hidden = false; listo = true;
             if (window.iniciarFondo) window.iniciarFondo();
           }
