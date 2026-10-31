@@ -170,7 +170,7 @@
     .slide img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
     .slide img.fill { object-fit:cover; transform:scale(1.2); filter:blur(18px) brightness(.5) saturate(1.2); }
     .sdots { position:absolute; z-index:3; left:0; right:0; bottom:5.2cqi; display:flex; justify-content:center; gap:1.6cqi; pointer-events:none; }
-    .sdots:empty { display:none; }
+    .sdots:empty, .sdots:has(i:only-child) { display:none; }
     .sdots i { width:1.8cqi; height:1.8cqi; border-radius:50%; background:rgba(255,255,255,.45); transition:background .3s, transform .3s; }
     .sdots i.on { background:#fff; transform:scale(1.35); }
     html.lite .slide img.fill { display:none; }
@@ -644,9 +644,7 @@
     // Cada foto prueba primero una copia reducida (wsrv.nl) y, si falla, los enlaces originales de Dropbox.
     (function () {
       var FOTOS = [
-        'https://www.dropbox.com/scl/fi/ad7t85s4hmm9z3skskhxh/358308.jpg?rlkey=bjlrwfy1sof3ocdjafk5hg6y2&st=kcnplgc1',
-        'https://www.dropbox.com/scl/fi/t46dga4spn8rhiiqz0toj/363587.jpg?rlkey=uuuj92busob2kdbalxwerp84y&st=1p46fwz0',
-        'https://www.dropbox.com/scl/fi/tbew0ejyobheeqm4af8cf/363585.jpg?rlkey=ocfzbfejqsx4a0asoqbms977z&st=ud1vtoth'
+        'https://www.dropbox.com/scl/fi/ad7t85s4hmm9z3skskhxh/358308.jpg?rlkey=bjlrwfy1sof3ocdjafk5hg6y2&st=kcnplgc1'
       ];
       var lite = document.documentElement.classList.contains('lite');
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
