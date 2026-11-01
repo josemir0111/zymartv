@@ -354,6 +354,9 @@
     .row h2 { margin-bottom:6px; }
     @media (max-width:600px) { .hero { padding-bottom:48px; } .row { padding-top:20px; padding-bottom:40px; } }
     @media (orientation:landscape) and (max-height:520px) { .hero { padding-bottom:40px; } .row { padding-top:20px; } }
+    /* Catálogo: tarjetas centradas (si no caben, sigue deslizando normal) */
+    #catalogo .stack > .poster:first-child { margin-left:auto; }
+    #catalogo .stack > .poster:last-child { margin-right:auto; }
   </style>
 </head>
 <body>
