@@ -516,7 +516,7 @@
   </script>
   <canvas id="dots" aria-hidden="true"></canvas>
   <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a>
-    <div class="visitas" id="visitas" tabindex="0" hidden aria-label="Visitantes únicos"><span class="pill"><i></i><span class="mini" id="mini"></span><b id="vtotal">0</b><span>visitantes</span></span><div class="paises" id="paises"></div></div>
+    <div class="visitas" id="visitas" tabindex="0" hidden aria-label="Visitantes constantes (entran todos los días)"><span class="pill"><i></i><span class="mini" id="mini"></span><b id="vtotal">0</b><span>visitantes</span></span><div class="paises" id="paises"></div></div>
   </header>
   <main>
     <section class="hero">
@@ -666,16 +666,21 @@
       $('social').appendChild(a);
     });
 
-    // Contador de visitantes ÚNICOS, todo dentro del index (sin servidor propio).
-    // Usa el servicio gratuito Abacus (abacus.jasoncameron.dev): un contador general y uno por país.
-    // Anti-duplicados: cada visitante deja dos "marcas" anónimas (una de su navegador y una de su IP, ambas cifradas).
-    // Solo se suma si NINGUNA de las dos existía antes, así que entrar de nuevo, o hacerlo en incógnito, no vuelve a contar.
+    // Contador de visitantes CONSTANTES, todo dentro del index (sin servidor propio).
+    // Usa el servicio gratuito Abacus (abacus.jasoncameron.dev): un contador general y uno por país, separados por día.
+    // Regla automática: un dispositivo solo cuenta si entra TODOS los días seguidos (racha de 2 o más días).
+    //  - Si entró una sola vez, no cuenta.
+    //  - Si pasa un día completo sin entrar, se elimina solo del contador (su racha vuelve a empezar de 1).
+    //  - Si borra los datos del navegador o usa incógnito, pierde la racha, así que tampoco infla el número.
+    // Se muestra: los que cumplieron ayer + los que hoy completan su segundo día seguido.
+    // "Entrar" = tocar Entrar, Descargar app o Copiar enlace (una vez al día basta). El día cambia a la medianoche de la zona horaria `zona`.
     // IMPORTANTE: cambia NS y SAL por textos únicos tuyos (letras, números y guiones; NS entre 3 y 64 caracteres).
     var CONTADOR = {
       api: 'https://abacus.jasoncameron.dev',
       ns: 'zymar-k7q2x9',
       sal: 'zymar-cambia-esta-frase',
-      dedupIP: true,   // true = también evita duplicados por IP (cubre incógnito). false = solo por navegador
+      zona: -5,        // horas respecto a UTC para el cambio de día (-5 = Perú)
+      dedupIP: false,  // true = además solo cuenta 1 dispositivo constante por IP y día (puede dejar fuera a quienes comparten IP). Con la racha diaria ya no hace falta
       // Países que se muestran con bandera (código ISO de 2 letras). Los demás igual suman al total.
       paises: ['PE','MX','CO','AR','CL','EC','BO','VE','UY','PY','CR','PA','ES','US','BR','DO']
     };
@@ -688,7 +693,7 @@
       setTimeout(go, 6000);
     }
     cuandoLibre(function () {
-      var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
+      var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_RACHA = 'zymar_vracha', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
       var API = CONTADOR.api + '/', NS = CONTADOR.ns + '/', PAISES = CONTADOR.paises;
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -734,19 +739,29 @@
           return r.json();
         }).then(function (d) { return Number(d.value); });
       }
+      // Día actual (o desplazado) como AAAAMMDD, en la zona horaria configurada
+      function dia(off) {
+        var d = new Date(Date.now() + CONTADOR.zona * 3600000 + (off || 0) * 86400000);
+        function z(n) { return (n < 10 ? '0' : '') + n; }
+        return d.getUTCFullYear() + z(d.getUTCMonth() + 1) + z(d.getUTCDate());
+      }
       // Total + los países con más visitantes (hasta 8). Si algo falla, no devuelve datos a medias.
+      // Visitantes constantes = los que cumplieron ayer (a-AYER) + los que hoy completan su 2.º día seguido (n-HOY).
       function resumen() {
-        var pedidos = [leer('total')].concat(PAISES.map(function (c) { return leer('pais-' + c.toLowerCase()); }));
+        var hoy = dia(0), ayer = dia(-1), pedidos = [];
+        ['tot'].concat(PAISES.map(function (c) { return c.toLowerCase(); })).forEach(function (c) {
+          pedidos.push(leer('a-' + ayer + '-' + c)); pedidos.push(leer('n-' + hoy + '-' + c));
+        });
         return Promise.all(pedidos).then(function (v) {
           if (v.indexOf(null) !== -1) throw new Error('lectura incompleta');
-          var lista = PAISES.map(function (c, i) { return { c: c, n: v[i + 1] }; })
+          var lista = PAISES.map(function (c, i) { return { c: c, n: v[2 * i + 2] + v[2 * i + 3] }; })
             .filter(function (p) { return p.n > 0; })
             .sort(function (a, b) { return b.n - a.n; })
             .slice(0, 8);
-          return { total: v[0], paises: lista };
+          return { total: v[0] + v[1], paises: lista };
         });
       }
-      function guardar(d) { pintar(d); lsSet(K_CACHE, JSON.stringify({ t: Date.now(), d: d })); }
+      function guardar(d) { pintar(d); lsSet(K_CACHE, JSON.stringify({ t: Date.now(), dia: dia(0), d: d })); }
 
       // Huella anónima (hash): nunca se guarda la IP ni el identificador reales
       function cyrb53(s, seed) {
@@ -781,39 +796,47 @@
         lsSet(K_ID, vid);
       }
 
-      // Deja las marcas del visitante. Cada "hit" devuelve cuántas veces se usó esa marca (1 = era nueva).
-      // Es un visitante nuevo SOLO si todas sus marcas valen 1. Si alguna ya existía, es alguien que ya entró.
-      function esNuevo(g) {
-        var marcas = [huella('d|' + vid).then(function (h) { return sumar('d-' + h); })];
-        if (CONTADOR.dedupIP && g.ip) marcas.push(huella('i|' + g.ip).then(function (h) { return sumar('v-' + h); }));
-        return Promise.all(marcas).then(function (vals) {
-          return vals.every(function (n) { return n === 1; });
-        });
-      }
-
       // Muestra al instante el último número guardado mientras llega el actualizado
       var cache = null;
       try { cache = JSON.parse(lsGet(K_CACHE)); } catch (e) {}
       if (cache && cache.d) pintar(cache.d);
 
       // Siempre se muestra el número actualizado (como máximo una vez cada 5 min)
-      if (!cache || Date.now() - cache.t > FRESCO) resumen().then(guardar).catch(function () {});
+      // (y siempre que haya cambiado el día, porque el conteo se reinicia cada día)
+      if (!cache || cache.dia !== dia(0) || Date.now() - cache.t > FRESCO) resumen().then(guardar).catch(function () {});
 
-      // Un dispositivo SOLO se cuenta cuando de verdad se conecta (toca Entrar, Descargar app o Copiar enlace).
-      // Quien solo abre la página y se va, nunca se suma. Y cada dispositivo/IP se suma una sola vez.
+      // Un dispositivo se registra cuando de verdad se conecta (toca Entrar, Descargar app o Copiar enlace), una vez por día.
+      // Su racha (días seguidos) se guarda en el propio dispositivo. Solo suma al contador con racha >= 2.
+      // Si falta un día, la racha vuelve a 1 y deja de contar hasta que entre 2 días seguidos otra vez.
       var registrando = false;
       function registrar() {
-        if (registrando || lsGet(K_REG)) return;
+        var hoy = dia(0), ayer = dia(-1);
+        if (registrando || lsGet(K_REG) === hoy) return;
         registrando = true;
-        geo().then(function (g) {
-          return esNuevo(g).then(function (nuevo) {
-            if (!nuevo) return;
-            var sumas = [sumar('total')];
-            if (g.cc && PAISES.indexOf(g.cc) >= 0) sumas.push(sumar('pais-' + g.cc.toLowerCase()).catch(function () {}));
-            return Promise.all(sumas);
+        var est = null; try { est = JSON.parse(lsGet(K_RACHA)); } catch (e) {}
+        var racha = (est && est.u === ayer) ? (Number(est.r) || 0) + 1 : 1;
+        var tarea = Promise.resolve();
+        if (racha >= 2) {
+          tarea = geo().then(function (g) {
+            var ok = (CONTADOR.dedupIP && g.ip)
+              ? huella('i|' + g.ip + '|' + hoy).then(function (h) { return sumar('v-' + h); }).then(function (n) { return n === 1; })
+              : Promise.resolve(true);
+            return ok.then(function (pasa) {
+              if (!pasa) return;
+              var claves = ['tot'];
+              if (g.cc && PAISES.indexOf(g.cc) >= 0) claves.push(g.cc.toLowerCase());
+              var sumas = [];
+              claves.forEach(function (c) {
+                sumas.push(sumar('a-' + hoy + '-' + c));              // cumple hoy (se mostrará mañana también)
+                if (racha === 2) sumas.push(sumar('n-' + hoy + '-' + c)); // recién completa su 2.º día: se suma a hoy
+              });
+              return Promise.all(sumas);
+            });
           });
-        }).then(function () {
-          lsSet(K_REG, '1');
+        }
+        tarea.then(function () {
+          lsSet(K_RACHA, JSON.stringify({ u: hoy, r: racha }));
+          lsSet(K_REG, hoy);
           return resumen();
         }).then(guardar).catch(function () { registrando = false; });
       }
