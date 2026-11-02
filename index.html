@@ -18,6 +18,7 @@
     // Detecta TV, equipos lentos o ahorro de datos y activa el modo ligero.
     // Se puede forzar con ?tv=1 o ?lite=1, y desactivar el modo ligero (fuera de TV) con ?lite=0
     (function () {
+      document.documentElement.className += ' cargando';
       var d = document.documentElement, ua = navigator.userAgent || '', q = location.search, c = navigator.connection || {};
       var tv = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|BRAVIA|HbbTV|AFTM|Android ?TV|GoogleTV|CrKey|Roku|VIDAA|Viera|Opera TV/i.test(ua) || /[?&]tv=1/.test(q);
       var lite = tv || /[?&]lite=1/.test(q) || c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '') || (navigator.deviceMemory && navigator.deviceMemory <= 2);
@@ -451,9 +452,54 @@
       .btn-info:not(.copied) .ic-check { display:none !important; }
       #ok { font-size:12px; margin-top:10px; }
     }
+
+    /* ===== Pantalla de carga (loader) ===== */
+    html.cargando, html.cargando body { overflow:hidden; }
+    #loader { position:fixed; inset:0; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:24px; text-align:center;
+      background:radial-gradient(ellipse at 20% 90%,rgba(229,9,20,.28),transparent 55%),radial-gradient(ellipse at 85% 10%,rgba(124,58,237,.26),transparent 55%),var(--bg);
+      transition:opacity .6s ease, visibility .6s ease, transform .6s ease; }
+    #loader.out { opacity:0; visibility:hidden; transform:scale(1.04); pointer-events:none; }
+    #loader .ld-logo { display:flex; justify-content:center; margin:0; font-size:clamp(38px,11vw,72px); font-weight:900; letter-spacing:.14em; padding-left:.14em; line-height:1; color:#fff;
+      text-shadow:0 2px 3px rgba(0,0,0,.7),0 0 34px rgba(229,9,20,.55); }
+    #loader .ld-logo span { display:inline-block; opacity:0; transform:translateY(14px); animation:ldIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
+    #loader .ld-logo span:nth-child(1) { animation-delay:.05s; } #loader .ld-logo span:nth-child(2) { animation-delay:.12s; }
+    #loader .ld-logo span:nth-child(3) { animation-delay:.19s; } #loader .ld-logo span:nth-child(4) { animation-delay:.26s; }
+    #loader .ld-logo span:nth-child(5) { animation-delay:.33s; }
+    @keyframes ldIn { to { opacity:1; transform:none; } }
+    #loader .ld-tag { margin:0; font-size:clamp(12px,3.4vw,15px); font-weight:600; letter-spacing:.06em; color:var(--muted); opacity:0; animation:ldIn .7s ease .55s forwards; }
+    #loader .ld-bar { position:relative; width:min(240px,62vw); height:3px; border-radius:99px; overflow:hidden; background:rgba(255,255,255,.12); opacity:0; animation:ldIn .5s ease .4s forwards; }
+    #loader .ld-bar i { position:absolute; inset:0; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--red),var(--red-soft)); box-shadow:0 0 14px rgba(229,9,20,.8);
+      animation:ldFill 1.6s cubic-bezier(.3,.7,.2,1) .4s forwards; }
+    #loader.done .ld-bar i { animation:none; width:100%; transition:width .25s ease; }
+    @keyframes ldFill { to { width:88%; } }
+    html.lite #loader { background:var(--bg); }
+    @media (prefers-reduced-motion:reduce) { #loader .ld-logo span, #loader .ld-tag, #loader .ld-bar { animation:none; opacity:1; transform:none; } #loader .ld-bar i { animation:none; width:88%; } #loader { transition:opacity .2s, visibility .2s; transform:none !important; } }
   </style>
+  <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
 <body>
+  <div id="loader" role="status" aria-live="polite" aria-label="Cargando Zymar">
+    <h1 class="ld-logo" aria-hidden="true"><span>Z</span><span>Y</span><span>M</span><span>A</span><span>R</span></h1>
+    <p class="ld-tag">Todo el entretenimiento en un solo lugar</p>
+    <div class="ld-bar" aria-hidden="true"><i></i></div>
+  </div>
+  <script>
+    // Quita la pantalla de carga cuando la página terminó de cargar (mínimo 1,4 s para que se vea fluida; máximo 4,5 s)
+    (function () {
+      var ld = document.getElementById('loader'), de = document.documentElement, t0 = Date.now(), listo = false;
+      function salir() {
+        if (listo) return; listo = true;
+        ld.classList.add('done');
+        setTimeout(function () {
+          ld.classList.add('out'); de.classList.remove('cargando');
+          setTimeout(function () { if (ld.parentNode) ld.parentNode.removeChild(ld); }, 800);
+        }, 260);
+      }
+      function cuando() { setTimeout(salir, Math.max(0, 1400 - (Date.now() - t0))); }
+      if (document.readyState === 'complete') cuando(); else addEventListener('load', cuando);
+      setTimeout(salir, 4500);
+    })();
+  </script>
   <canvas id="dots" aria-hidden="true"></canvas>
   <header class="nav" id="nav"><a class="logo" href="#">ZYMAR</a>
     <div class="visitas" id="visitas" tabindex="0" hidden aria-label="Visitantes únicos"><span class="pill"><i></i><span class="mini" id="mini"></span><b id="vtotal">0</b><span>visitantes</span></span><div class="paises" id="paises"></div></div>
