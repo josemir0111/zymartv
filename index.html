@@ -859,12 +859,15 @@
     });
 
     // Deportes de hoy: partidos de fútbol del día (TheSportsDB, gratis y sin registro).
-    // Para cambiar las ligas que se muestran, edita LIGAS (nombres en inglés, separados por |). Para ver todos los partidos, pon LIGAS = null.
-    // Las horas se muestran en la hora local de cada visitante. Los resultados se actualizan solos cada 3 minutos mientras la página está abierta
-      // (y al volver a la pestaña); en el dispositivo se guardan 2 min para no gastar el límite gratuito.
+    // El plan gratis de TheSportsDB entrega muy pocos partidos por consulta, así que se pide cada liga por separado (LIGAS: id de la liga en TheSportsDB).
+    // Para agregar otra liga, añade su id (está en la dirección de su página: thesportsdb.com/league/4688). EXTRA atrapa ligas cuyo id no está en la lista.
+    // Las horas se muestran en la hora local de cada visitante. Los resultados se actualizan solos cada 5 minutos mientras la página está abierta
+    // (y al volver a la pestaña); en el dispositivo se guardan 4 min para no gastar el límite gratuito.
     (function () {
-      var LIGAS = /Peru|Libertadores|Sudamericana|Champions League|Europa League|Premier League|La Liga|Serie A|Bundesliga|Ligue 1|World Cup|Eliminatorias|Copa America|Liga MX|MLS|Argentin|Brazil|Colombia/i;
-      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep', FRESCO = 2 * 60 * 1000, CADA = 3 * 60 * 1000, MAX = 24;
+      var LIGAS = ['4688', '4406', '4351', '4346', '4350', '4328', '4335', '4331', '4332', '4334', '4480', '4481', '4501', '4429'];
+      // Perú, Argentina, Brasil, MLS, Liga MX, Premier, LaLiga, Bundesliga, Serie A, Ligue 1, Champions, Europa League, Libertadores, Mundial
+      var EXTRA = /Colombia|Sudamericana|Eliminatorias|Qualif|Copa America/i;
+      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep2', FRESCO = 4 * 60 * 1000, CADA = 5 * 60 * 1000, MAX = 40;
       var sec = document.getElementById('deportes'), box = document.getElementById('dep'), nota = document.getElementById('depnota');
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -883,19 +886,27 @@
                                : Date.parse(e.dateEvent + 'T' + (e.strTime || '00:00:00') + 'Z');
         return isNaN(t) ? null : t;
       }
-      function pedir(f) {
+      var fallos = 0;
+      function pedir(f, filtro) {
         return fetch(API + f).then(function (r) { if (!r.ok) throw new Error('dep'); return r.json(); })
-          .then(function (d) { return d && d.events ? d.events : []; });
+          .then(function (d) { var l = d && d.events ? d.events : []; return filtro ? l.filter(function (e) { return filtro.test(e.strLeague || ''); }) : l; })
+          .catch(function () { fallos++; return []; });
       }
       function buscar() {
         var dias = [ymdUTC(a), ymdUTC(b - 1)];
         if (dias[0] === dias[1]) dias.pop();
-        return Promise.all(dias.map(pedir)).then(function (r) {
+        var pedidos = [];
+        fallos = 0;
+        dias.forEach(function (d) {
+          LIGAS.forEach(function (id) { pedidos.push(pedir(d + '&l=' + id)); });
+          pedidos.push(pedir(d, EXTRA));
+        });
+        return Promise.all(pedidos).then(function (r) {
+          if (fallos === pedidos.length) throw new Error('sin servicio');
           var vistos = {}, out = [];
           [].concat.apply([], r).forEach(function (e) {
             var t = hora(e);
             if (t === null || t < a || t >= b || vistos[e.idEvent]) return;
-            if (LIGAS && !LIGAS.test(e.strLeague || '')) return;
             vistos[e.idEvent] = 1;
             var hs = e.intHomeScore, as = e.intAwayScore;
             out.push({ t: t, l: e.strHomeTeam || '', v: e.strAwayTeam || '', c: e.strLeague || '',
@@ -917,7 +928,7 @@
           if (m.m) { var s = document.createElement('div'); s.className = 'dep-s'; s.textContent = m.m; it.appendChild(s); }
           box.appendChild(it);
         });
-        nota.textContent = lista.length ? 'Horarios en tu hora local. Datos: TheSportsDB.' : 'Hoy no hay partidos de las ligas principales.';
+        nota.textContent = lista.length ? 'Horarios en tu hora local. Datos: TheSportsDB (plan gratuito: puede faltar algún partido).' : 'No hay partidos de estas ligas hoy, o el servicio gratuito no los entregó.';
         sec.hidden = false;
       }
       function actualizar(forzar) {
@@ -925,7 +936,8 @@
         var c = null; try { c = JSON.parse(lsGet(K)); } catch (e) {}
         var k = clave;
         if (c && c.k === k && Array.isArray(c.e)) { if (!forzar || sec.hidden) pintar(c.e); if (!forzar && Date.now() - c.t < FRESCO) return; }
-        buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: k, e: l })); pintar(l); }).catch(function () {});
+        buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: k, e: l })); pintar(l); })
+          .catch(function () { if (sec.hidden) { box.textContent = ''; nota.textContent = 'No se pudieron cargar los partidos ahora. Se reintenta solo.'; sec.hidden = false; } });
       }
       function cargar() {
         actualizar(false);
