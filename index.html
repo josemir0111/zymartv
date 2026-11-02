@@ -488,6 +488,15 @@
     html.lite .divisor::before, html.lite .divisor::after, html.lite .divisor i { animation:none; }
     @media (prefers-reduced-motion:reduce) { .divisor::before, .divisor::after, .divisor i { animation:none; } }
     @media (max-width:600px) { .divisor { margin-bottom:18px; gap:12px; } .divisor i::before { left:-22px; } .divisor i::after { right:-22px; } }
+    /* Deportes de hoy */
+    .dep { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; margin-top:10px; }
+    .dep-m { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); }
+    .dep-h { min-width:48px; font-weight:800; font-size:15px; color:var(--red-soft); text-align:center; }
+    .dep-t { flex:1; min-width:0; font-size:14px; line-height:1.35; }
+    .dep-t b { display:block; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dep-t small { display:block; margin-top:2px; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dep-s { font-weight:800; font-size:15px; white-space:nowrap; }
+    .dep-n { margin:8px 0 0; color:var(--muted); font-size:13px; }
   </style>
   <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
@@ -563,6 +572,11 @@
       </div>
       <button class="car-btn next" type="button" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
+    </section>
+    <section class="row" id="deportes" hidden>
+      <h2>Deportes de hoy</h2>
+      <div class="dep" id="dep" role="list" aria-label="Partidos de hoy"></div>
+      <p class="dep-n" id="depnota"></p>
     </section>
     </main>
   <footer class="foot">
@@ -843,6 +857,71 @@
       window.zymarRegistrar = registrar;
       if (window.zymarConectado) registrar();   // si tocó un botón antes de que cargara el contador
     });
+
+    // Deportes de hoy: partidos de fútbol del día (TheSportsDB, gratis y sin registro).
+    // Para cambiar las ligas que se muestran, edita LIGAS (nombres en inglés, separados por |). Para ver todos los partidos, pon LIGAS = null.
+    // Las horas se muestran en la hora local de cada visitante. El resultado se guarda 30 min en el dispositivo para no gastar el límite gratuito.
+    (function () {
+      var LIGAS = /Peru|Libertadores|Sudamericana|Champions League|Europa League|Premier League|La Liga|Serie A|Bundesliga|Ligue 1|World Cup|Eliminatorias|Copa America|Liga MX|MLS|Argentin|Brazil|Colombia/i;
+      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep', FRESCO = 30 * 60 * 1000, MAX = 24;
+      var sec = document.getElementById('deportes'), box = document.getElementById('dep'), nota = document.getElementById('depnota');
+      function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function z(n) { return (n < 10 ? '0' : '') + n; }
+      function ymdUTC(t) { var d = new Date(t); return d.getUTCFullYear() + '-' + z(d.getUTCMonth() + 1) + '-' + z(d.getUTCDate()); }
+
+      var ini = new Date(); ini.setHours(0, 0, 0, 0);
+      var a = ini.getTime(), b = a + 86400000, clave = ini.getFullYear() + '-' + z(ini.getMonth() + 1) + '-' + z(ini.getDate());
+
+      function hora(e) {
+        var t = e.strTimestamp ? Date.parse(e.strTimestamp + (/(Z|[+-]\d\d:?\d\d)$/i.test(e.strTimestamp) ? '' : 'Z'))
+                               : Date.parse(e.dateEvent + 'T' + (e.strTime || '00:00:00') + 'Z');
+        return isNaN(t) ? null : t;
+      }
+      function pedir(f) {
+        return fetch(API + f).then(function (r) { if (!r.ok) throw new Error('dep'); return r.json(); })
+          .then(function (d) { return d && d.events ? d.events : []; });
+      }
+      function buscar() {
+        var dias = [ymdUTC(a), ymdUTC(b - 1)];
+        if (dias[0] === dias[1]) dias.pop();
+        return Promise.all(dias.map(pedir)).then(function (r) {
+          var vistos = {}, out = [];
+          [].concat.apply([], r).forEach(function (e) {
+            var t = hora(e);
+            if (t === null || t < a || t >= b || vistos[e.idEvent]) return;
+            if (LIGAS && !LIGAS.test(e.strLeague || '')) return;
+            vistos[e.idEvent] = 1;
+            var hs = e.intHomeScore, as = e.intAwayScore;
+            out.push({ t: t, l: e.strHomeTeam || '', v: e.strAwayTeam || '', c: e.strLeague || '',
+                       m: (hs !== null && hs !== undefined && hs !== '' && as !== null && as !== undefined && as !== '') ? hs + ' - ' + as : '' });
+          });
+          out.sort(function (x, y) { return x.t - y.t; });
+          return out.slice(0, MAX);
+        });
+      }
+      function pintar(lista) {
+        box.textContent = '';
+        lista.forEach(function (m) {
+          var d = new Date(m.t), it = document.createElement('div'); it.className = 'dep-m'; it.setAttribute('role', 'listitem');
+          var h = document.createElement('div'); h.className = 'dep-h'; h.textContent = z(d.getHours()) + ':' + z(d.getMinutes());
+          var t = document.createElement('div'); t.className = 'dep-t';
+          var n = document.createElement('b'); n.textContent = m.l + ' vs ' + m.v;
+          var c = document.createElement('small'); c.textContent = m.c;
+          t.appendChild(n); t.appendChild(c); it.appendChild(h); it.appendChild(t);
+          if (m.m) { var s = document.createElement('div'); s.className = 'dep-s'; s.textContent = m.m; it.appendChild(s); }
+          box.appendChild(it);
+        });
+        nota.textContent = lista.length ? 'Horarios en tu hora local. Datos: TheSportsDB.' : 'Hoy no hay partidos de las ligas principales.';
+        sec.hidden = false;
+      }
+      function cargar() {
+        var c = null; try { c = JSON.parse(lsGet(K)); } catch (e) {}
+        if (c && c.k === clave && Array.isArray(c.e)) { pintar(c.e); if (Date.now() - c.t < FRESCO) return; }
+        buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: clave, e: l })); pintar(l); }).catch(function () {});
+      }
+      cuandoLibre(cargar);
+    })();
 
     // Fondo de pantalla (Dropbox). Primero pide una copia reducida en WebP (960 px: mucho más liviana y suficiente,
     // porque el fondo va desenfocado y oscuro). Si falla, usa los enlaces originales de Dropbox.
