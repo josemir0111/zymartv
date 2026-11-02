@@ -168,7 +168,7 @@
     .slides { position:absolute; inset:0; touch-action:pan-y; }
     .slide { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .7s ease, visibility .7s; }
     .slide.on { opacity:1; visibility:visible; }
-    .slide img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+    .slide img, .slide video { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
     .slide img.fill { object-fit:cover; transform:scale(1.2); filter:blur(18px) brightness(.5) saturate(1.2); }
     .sdots { position:absolute; z-index:3; left:0; right:0; bottom:5.2cqi; display:flex; justify-content:center; gap:1.6cqi; pointer-events:none; }
     .sdots:empty, .sdots:has(i:only-child) { display:none; }
@@ -846,19 +846,21 @@
       setTimeout(window.iniciarFondo, 2500);
     })();
 
-    // Carrusel de imágenes dentro del celular (Dropbox). Para agregar más, añade otro enlace a la lista FOTOS.
+    // Carrusel dentro del celular (Dropbox): acepta imágenes y videos .mp4. Para agregar más, añade otro enlace a la lista FOTOS.
     // Cada foto prueba primero una copia reducida (wsrv.nl) y, si falla, los enlaces originales de Dropbox.
     (function () {
       var FOTOS = [
-        'https://www.dropbox.com/scl/fi/ad7t85s4hmm9z3skskhxh/358308.jpg?rlkey=bjlrwfy1sof3ocdjafk5hg6y2&st=kcnplgc1'
+        'https://www.dropbox.com/scl/fi/nquhsgv1txb07idc5tfzj/lv_0_20261102150308.mp4?rlkey=qu8bgw9j4bgdly7cuc8naimym&st=e9c0w6bc'
       ];
       var lite = document.documentElement.classList.contains('lite');
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
       var box = document.getElementById('shot'), cont = document.getElementById('slides'), dots = document.getElementById('sdots');
       var slides = [], actual = -1, pausa = false, timer = 0, primera = true;
 
+      function esVideo(u) { return /\.(mp4|webm|mov)(\?|$)/i.test(u); }
       function candidatos(base) {
         var raw = base + '&raw=1';
+        if (esVideo(base)) return [raw, base.replace('www.dropbox.com', 'dl.dropboxusercontent.com') + '&raw=1', base + '&dl=1'];
         return ['https://wsrv.nl/?url=' + encodeURIComponent(raw) + '&w=500&we&q=70&output=webp', raw, base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'), base + '&dl=1'];
       }
       function mostrar(n) {
@@ -876,7 +878,17 @@
       }
       function agregar(u) {
         var el = document.createElement('div'); el.className = 'slide';
-        var im = new Image(); im.alt = ''; im.decoding = 'async'; im.src = u; el.appendChild(im);
+        if (esVideo(u) || esVideo(FOTOS[slides.length] || '')) {
+          var v = document.createElement('video');
+          v.src = u; v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+          v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.preload = 'auto';
+          el.appendChild(v);
+          var pl = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
+          pl(); v.addEventListener('canplay', pl);
+          document.addEventListener('visibilitychange', function () { if (!document.hidden) pl(); });
+        } else {
+          var im = new Image(); im.alt = ''; im.decoding = 'async'; im.src = u; el.appendChild(im);
+        }
         var dot = document.createElement('i');
         slides.push({ el: el, dot: dot, idx: slides.length });
         return { el: el, dot: dot };
@@ -886,7 +898,13 @@
         var cand = candidatos(FOTOS[k]), i = 0;
         (function probar() {
           if (i >= cand.length) { fin(); return; }
-          var u = cand[i++], t = new Image();
+          var u = cand[i++], t;
+          if (esVideo(FOTOS[k])) {
+            t = document.createElement('video'); t.muted = true; t.preload = 'metadata';
+            t.onloadedmetadata = function () { cargadas.push({ k: k, u: u, w: t.videoWidth, h: t.videoHeight }); t.removeAttribute('src'); t.load(); fin(); };
+            t.onerror = probar; t.src = u; return;
+          }
+          t = new Image();
           t.decoding = 'async'; try { t.fetchPriority = k === 0 ? 'high' : 'low'; } catch (e) {}
           t.onload = function () { cargadas.push({ k: k, u: u, w: t.naturalWidth, h: t.naturalHeight }); fin(); };
           t.onerror = probar; t.src = u;
