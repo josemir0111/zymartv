@@ -425,7 +425,10 @@
 
     /* ===== Celular vertical: texto a la izquierda, celular a la derecha; instalación a todo el ancho debajo ===== */
     @media (max-width:600px) and (orientation:portrait) {
-      .hero { align-items:flex-start; min-height:100svh; padding:82px 16px 28px; }
+      .hero { align-items:flex-start; min-height:0; padding:82px 16px 6px; }
+      .row { padding-top:14px; padding-bottom:36px; }
+      .row h2 { margin-bottom:0; }
+      .stack { padding-top:12px; }
       .grid { grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); grid-template-rows:1fr auto auto auto 1fr auto auto auto;
         column-gap:12px; row-gap:0; justify-items:stretch; align-items:start; }
       .txt { display:contents; animation:none; }
@@ -573,6 +576,9 @@
       o.style.left = (e.clientX - r.left - d / 2) + 'px'; o.style.top = (e.clientY - r.top - d / 2) + 'px';
       el.appendChild(o); setTimeout(function () { o.remove(); }, 700);
     }
+    // Cuenta al visitante solo cuando se conecta de verdad (ver el contador más abajo)
+    function conectado() { window.zymarConectado = true; if (window.zymarRegistrar) window.zymarRegistrar(); }
+    ['enter', 'dl', 'copy'].forEach(function (id) { $(id).addEventListener('click', conectado); });
     $('copy').addEventListener('pointerdown', ripple);
     $('enter').addEventListener('pointerdown', ripple);
     $('dl').addEventListener('pointerdown', ripple);
@@ -729,23 +735,29 @@
       try { cache = JSON.parse(lsGet(K_CACHE)); } catch (e) {}
       if (cache && cache.d) pintar(cache.d);
 
-      // Si este navegador ya fue revisado, solo actualiza el número (y no más de una vez cada 5 min)
-      if (lsGet(K_REG)) {
-        if (!cache || Date.now() - cache.t > FRESCO) resumen().then(guardar).catch(function () {});
-        return;
+      // Siempre se muestra el número actualizado (como máximo una vez cada 5 min)
+      if (!cache || Date.now() - cache.t > FRESCO) resumen().then(guardar).catch(function () {});
+
+      // Un dispositivo SOLO se cuenta cuando de verdad se conecta (toca Entrar, Descargar app o Copiar enlace).
+      // Quien solo abre la página y se va, nunca se suma. Y cada dispositivo/IP se suma una sola vez.
+      var registrando = false;
+      function registrar() {
+        if (registrando || lsGet(K_REG)) return;
+        registrando = true;
+        geo().then(function (g) {
+          return esNuevo(g).then(function (nuevo) {
+            if (!nuevo) return;
+            var sumas = [sumar('total')];
+            if (g.cc && PAISES.indexOf(g.cc) >= 0) sumas.push(sumar('pais-' + g.cc.toLowerCase()).catch(function () {}));
+            return Promise.all(sumas);
+          });
+        }).then(function () {
+          lsSet(K_REG, '1');
+          return resumen();
+        }).then(guardar).catch(function () { registrando = false; });
       }
-      // Primera vez en este navegador: comprueba si es un visitante nuevo y, solo entonces, suma al total y a su país
-      geo().then(function (g) {
-        return esNuevo(g).then(function (nuevo) {
-          if (!nuevo) return;
-          var sumas = [sumar('total')];
-          if (g.cc && PAISES.indexOf(g.cc) >= 0) sumas.push(sumar('pais-' + g.cc.toLowerCase()).catch(function () {}));
-          return Promise.all(sumas);
-        });
-      }).then(function () {
-        lsSet(K_REG, '1');
-        return resumen();
-      }).then(guardar).catch(function () {});
+      window.zymarRegistrar = registrar;
+      if (window.zymarConectado) registrar();   // si tocó un botón antes de que cargara el contador
     });
 
     // Fondo de pantalla (Dropbox). Primero pide una copia reducida en WebP (960 px: mucho más liviana y suficiente,
