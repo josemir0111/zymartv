@@ -335,9 +335,9 @@
     /* Fondo responsive: capa 1 (.bg) = la misma imagen muy desenfocada que rellena todo sin mostrar zoom;
        capa 2 (.bgf) = la imagen completa y nítida, ajustada a la pantalla (nunca recortada) y con bordes que se funden. */
     .bg { filter:blur(18px) saturate(1.3) brightness(.4); transform:scale(1.15); animation:none; }
-    .bgf { position:absolute; inset:0; z-index:0; pointer-events:none; background:center / contain no-repeat; opacity:0; transition:opacity .8s ease;
-      filter:saturate(1.1) brightness(.62);
-      -webkit-mask-image:radial-gradient(ellipse 78% 74% at 50% 46%,#000 52%,transparent 100%); mask-image:radial-gradient(ellipse 78% 74% at 50% 46%,#000 52%,transparent 100%); }
+    .bgf { position:absolute; left:0; right:0; top:0; bottom:auto; width:100%; aspect-ratio:var(--ar,1.78); max-height:100%; z-index:0; pointer-events:none;
+      background:center 30% / cover no-repeat; opacity:0; transition:opacity .8s ease; filter:saturate(1.15) brightness(.72);
+      -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%); mask-image:linear-gradient(180deg,#000 55%,transparent 100%); }
     .bgf.on { opacity:1; }
     .hero::after { content:""; position:absolute; inset:0; z-index:2; pointer-events:none; mix-blend-mode:screen; opacity:.9;
       background:
@@ -986,7 +986,10 @@
         img.onload = function () {
           var url = 'url("' + u + '")';
           bg.style.backgroundImage = url;
-          if (bgf) { bgf.style.backgroundImage = url; bgf.classList.add('on'); }
+          if (bgf) {
+            if (img.naturalWidth && img.naturalHeight) bgf.style.setProperty('--ar', (img.naturalWidth / img.naturalHeight).toFixed(4));
+            bgf.style.backgroundImage = url; bgf.classList.add('on');
+          }
         };
         img.onerror = probar;
         img.src = u;
