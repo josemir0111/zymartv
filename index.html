@@ -557,6 +557,11 @@
         <div class="hb" aria-hidden="true"></div></div></figure>
       </div>
     </section>
+    <section class="row" id="deportes" hidden>
+      <h2>Deportes de hoy</h2>
+      <div class="dep" id="dep" role="list" aria-label="Partidos de hoy"></div>
+      <p class="dep-n" id="depnota"></p>
+    </section>
     <section class="row" id="catalogo">
       <div class="divisor" aria-hidden="true"><i></i></div>
       <h2>Explora el catálogo</h2>
@@ -572,11 +577,6 @@
       </div>
       <button class="car-btn next" type="button" aria-label="Siguiente"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
-    </section>
-    <section class="row" id="deportes" hidden>
-      <h2>Deportes de hoy</h2>
-      <div class="dep" id="dep" role="list" aria-label="Partidos de hoy"></div>
-      <p class="dep-n" id="depnota"></p>
     </section>
     </main>
   <footer class="foot">
@@ -860,18 +860,23 @@
 
     // Deportes de hoy: partidos de fútbol del día (TheSportsDB, gratis y sin registro).
     // Para cambiar las ligas que se muestran, edita LIGAS (nombres en inglés, separados por |). Para ver todos los partidos, pon LIGAS = null.
-    // Las horas se muestran en la hora local de cada visitante. El resultado se guarda 30 min en el dispositivo para no gastar el límite gratuito.
+    // Las horas se muestran en la hora local de cada visitante. Los resultados se actualizan solos cada 3 minutos mientras la página está abierta
+      // (y al volver a la pestaña); en el dispositivo se guardan 2 min para no gastar el límite gratuito.
     (function () {
       var LIGAS = /Peru|Libertadores|Sudamericana|Champions League|Europa League|Premier League|La Liga|Serie A|Bundesliga|Ligue 1|World Cup|Eliminatorias|Copa America|Liga MX|MLS|Argentin|Brazil|Colombia/i;
-      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep', FRESCO = 30 * 60 * 1000, MAX = 24;
+      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep', FRESCO = 2 * 60 * 1000, CADA = 3 * 60 * 1000, MAX = 24;
       var sec = document.getElementById('deportes'), box = document.getElementById('dep'), nota = document.getElementById('depnota');
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
       function z(n) { return (n < 10 ? '0' : '') + n; }
       function ymdUTC(t) { var d = new Date(t); return d.getUTCFullYear() + '-' + z(d.getUTCMonth() + 1) + '-' + z(d.getUTCDate()); }
 
-      var ini = new Date(); ini.setHours(0, 0, 0, 0);
-      var a = ini.getTime(), b = a + 86400000, clave = ini.getFullYear() + '-' + z(ini.getMonth() + 1) + '-' + z(ini.getDate());
+      var a, b, clave;
+      function hoy() {   // se recalcula en cada actualización, así cambia solo a medianoche
+        var ini = new Date(); ini.setHours(0, 0, 0, 0);
+        a = ini.getTime(); b = a + 86400000; clave = ini.getFullYear() + '-' + z(ini.getMonth() + 1) + '-' + z(ini.getDate());
+      }
+      hoy();
 
       function hora(e) {
         var t = e.strTimestamp ? Date.parse(e.strTimestamp + (/(Z|[+-]\d\d:?\d\d)$/i.test(e.strTimestamp) ? '' : 'Z'))
@@ -915,10 +920,17 @@
         nota.textContent = lista.length ? 'Horarios en tu hora local. Datos: TheSportsDB.' : 'Hoy no hay partidos de las ligas principales.';
         sec.hidden = false;
       }
-      function cargar() {
+      function actualizar(forzar) {
+        hoy();
         var c = null; try { c = JSON.parse(lsGet(K)); } catch (e) {}
-        if (c && c.k === clave && Array.isArray(c.e)) { pintar(c.e); if (Date.now() - c.t < FRESCO) return; }
-        buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: clave, e: l })); pintar(l); }).catch(function () {});
+        var k = clave;
+        if (c && c.k === k && Array.isArray(c.e)) { if (!forzar || sec.hidden) pintar(c.e); if (!forzar && Date.now() - c.t < FRESCO) return; }
+        buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: k, e: l })); pintar(l); }).catch(function () {});
+      }
+      function cargar() {
+        actualizar(false);
+        setInterval(function () { if (!document.hidden) actualizar(true); }, CADA);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) actualizar(false); });
       }
       cuandoLibre(cargar);
     })();
