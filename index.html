@@ -489,14 +489,16 @@
     @media (prefers-reduced-motion:reduce) { .divisor::before, .divisor::after, .divisor i { animation:none; } }
     @media (max-width:600px) { .divisor { margin-bottom:18px; gap:12px; } .divisor i::before { left:-22px; } .divisor i::after { right:-22px; } }
     /* Deportes de hoy */
-    .dep { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; margin-top:10px; }
-    .dep-m { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); }
+    #deportes { padding-top:20px; padding-bottom:0; }
+    .dep { display:flex; gap:10px; margin-top:8px; padding-bottom:8px; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+    .dep-m { flex:0 0 min(300px,82vw); scroll-snap-align:start; display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); }
     .dep-h { min-width:48px; font-weight:800; font-size:15px; color:var(--red-soft); text-align:center; }
     .dep-t { flex:1; min-width:0; font-size:14px; line-height:1.35; }
     .dep-t b { display:block; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .dep-t small { display:block; margin-top:2px; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .dep-s { font-weight:800; font-size:15px; white-space:nowrap; }
-    .dep-n { margin:8px 0 0; color:var(--muted); font-size:13px; }
+    .dep-n { margin:4px 0 0; color:var(--muted); font-size:13px; }
+    .dep-n:empty { display:none; }
   </style>
   <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
@@ -928,7 +930,7 @@
           if (m.m) { var s = document.createElement('div'); s.className = 'dep-s'; s.textContent = m.m; it.appendChild(s); }
           box.appendChild(it);
         });
-        nota.textContent = lista.length ? 'Horarios en tu hora local. Datos: TheSportsDB (plan gratuito: puede faltar algún partido).' : 'No hay partidos de estas ligas hoy, o el servicio gratuito no los entregó.';
+        nota.textContent = lista.length ? '' : 'No hay partidos de estas ligas hoy, o el servicio gratuito no los entregó.';
         sec.hidden = false;
       }
       function actualizar(forzar) {
