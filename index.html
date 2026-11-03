@@ -854,8 +854,8 @@
           if (m.m) { var s = document.createElement('div'); s.className = 'dep-s'; s.textContent = m.m; it.appendChild(s); }
           box.appendChild(it);
         });
-        nota.textContent = lista.length ? '' : 'No hay partidos de estas ligas hoy, o el servicio gratuito no los entregó.';
-        sec.hidden = false;
+        nota.textContent = '';
+        sec.hidden = !lista.length; // sin partidos: la sección no se muestra
       }
       function actualizar(forzar) {
         hoy();
@@ -863,12 +863,12 @@
         var k = clave;
         if (c && c.k === k && Array.isArray(c.e)) { if (!forzar || sec.hidden) pintar(c.e); if (!forzar && Date.now() - c.t < FRESCO) return; }
         buscar().then(function (l) { lsSet(K, JSON.stringify({ t: Date.now(), k: k, e: l })); pintar(l); })
-          .catch(function () { if (sec.hidden) { box.textContent = ''; nota.textContent = 'No se pudieron cargar los partidos ahora. Se reintenta solo.'; sec.hidden = false; } });
+          .catch(function () { sec.hidden = true; });
       }
       function cargar() {
         actualizar(false);
         setInterval(function () { if (!document.hidden) actualizar(true); }, CADA);
-        setInterval(function () { if (ultima.length && !sec.hidden) pintar(ultima); }, 60000);
+        setInterval(function () { if (ultima.length) pintar(ultima); }, 60000);
         document.addEventListener('visibilitychange', function () { if (!document.hidden) actualizar(false); });
       }
       cuandoLibre(cargar);
