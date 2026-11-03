@@ -337,13 +337,16 @@
     html { font-size:clamp(13px, .42vw + 9px, 22px); }
     html.tv { font-size:clamp(15px, .9vw + 6px, 26px); }
 
+    #loader { align-items:center; justify-content:center; text-align:center; }
+    #loader .ld-logo, #loader .ld-tag { align-self:center; }
+
     /* --- Portada --- */
     .hero { min-height:100vh; min-height:100svh; display:flex; align-items:center;
       padding:calc(4.8rem + env(safe-area-inset-top,0px)) var(--safe-x) 3rem; }
     .grid { max-width:80rem; grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr); gap:clamp(1.5rem,4vw,5rem); align-items:center; justify-items:center; }
     .grid > * { min-width:0; }
     .txt { width:100%; max-width:40rem; justify-self:start; text-align:left; }
-    h1 { font-size:clamp(1.9rem, 1rem + 2.5vw, 3.4rem); line-height:1.08; margin:0 0 .6rem; }
+    .txt h1 { font-size:clamp(1.9rem, 1rem + 2.5vw, 3.4rem); line-height:1.08; margin:0 0 .6rem; }
     .lead { font-size:clamp(1rem, .9rem + .35vw, 1.2rem); line-height:1.45; margin:0 0 1.1rem; max-width:none; }
     .shot { width:100%; max-width:min(18rem, 36svh); justify-self:center; margin:0; }
 
@@ -381,7 +384,7 @@
       .hero { min-height:auto; align-items:flex-start; padding:calc(4.4rem + env(safe-area-inset-top,0px)) 1rem 1.5rem; }
       .grid { grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); column-gap:.9rem; row-gap:0; grid-template-rows:1fr auto auto auto 1fr auto auto auto; align-items:start; justify-items:stretch; }
       .txt { display:contents; animation:none; }
-      h1 { grid-column:1; grid-row:2; align-self:end; font-size:clamp(1.05rem, 5.6vw, 2.3rem); line-height:1.1; margin:0 0 .5rem; }
+      .txt h1 { grid-column:1; grid-row:2; align-self:end; font-size:clamp(1.05rem, 5.6vw, 2.3rem); line-height:1.1; margin:0 0 .5rem; }
       .lead { grid-column:1; grid-row:3; font-size:clamp(.78rem, 3.5vw, 1.1rem); line-height:1.35; margin:0 0 .8rem; }
       .acts { grid-column:1; grid-row:4; align-self:start; }
       .shot { grid-column:2; grid-row:1 / 6; align-self:center; justify-self:center; width:100%; max-width:min(11rem, 100%); }
@@ -402,7 +405,7 @@
       .hero { min-height:auto; align-items:center; padding:3.8rem max(1.2rem,env(safe-area-inset-right,0px)) 1.5rem max(1.2rem,env(safe-area-inset-left,0px)); }
       .grid { grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr); gap:1.2rem; justify-items:center; }
       .txt { justify-self:start; max-width:34rem; }
-      h1 { font-size:clamp(1.3rem, 3.4vw, 2rem); margin-bottom:.4rem; }
+      .txt h1 { font-size:clamp(1.3rem, 3.4vw, 2rem); margin-bottom:.4rem; }
       .lead { font-size:.9rem; margin-bottom:.6rem; }
       .btn-play { min-height:2.7rem; font-size:1rem; padding:.5rem 1rem; }
       .btn-info, .btn-dl { min-height:2.4rem; font-size:.85rem; padding:.4rem .7rem; }
