@@ -874,17 +874,13 @@
       cuandoLibre(cargar);
     })();
 
-    // Fondo de pantalla (Dropbox). Primero pide una copia reducida en WebP (960 px: mucho más liviana y suficiente,
-    // porque el fondo va desenfocado y oscuro). Si falla, usa los enlaces originales de Dropbox.
+    // Fondo de pantalla. Para cambiarlo, edita solo la línea FONDO. Si el enlace directo falla, prueba una copia por wsrv.nl.
     // Arranca cuando la imagen del celular ya cargó (o a los 2,5 s) para que no compitan entre sí.
     (function () {
-      var base = 'https://www.dropbox.com/scl/fi/is9phffwd2u5e26c83rrn/Cartel-ne-n-de-m-sica-y-entretenimiento.png?rlkey=mecjh8fbe9he7e5nvx9yv7lru&st=uhb7kz57';
-      var raw = base + '&raw=1';
+      var FONDO = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7G2ICccDchfOtBmXAmUpj2qxrcvCWLIDAvL99v4fUpZMWNDS0jDQfRjIo&s=10';
       var candidatos = [
-        'https://wsrv.nl/?url=' + encodeURIComponent(raw) + '&w=960&we&q=60&output=webp',
-        raw,
-        base.replace('www.dropbox.com', 'dl.dropboxusercontent.com'),
-        base + '&dl=1'
+        FONDO,
+        'https://wsrv.nl/?url=' + encodeURIComponent(FONDO) + '&w=960&we&q=70&output=webp'
       ];
       var i = 0, bg = document.querySelector('.bg'), bgf = document.querySelector('.bgf'), iniciado = false;
       function probar() {
