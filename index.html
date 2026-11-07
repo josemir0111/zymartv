@@ -915,9 +915,12 @@
     // Carrusel dentro del celular (Dropbox): acepta imágenes y videos .mp4. Para agregar más, añade otro enlace a la lista FOTOS.
     // Cada foto prueba primero una copia reducida (wsrv.nl) y, si falla, los enlaces originales de Dropbox.
     (function () {
+      // Enlaces ocultos (no se ven en texto plano en el código). Para agregar uno nuevo, cífralo igual y añádelo a la lista.
+      var CLAVE = 'zy7Mar#Q9x';
+      function desc(t) { var r = atob(t), o = ''; for (var i = 0; i < r.length; i++) o += String.fromCharCode(r.charCodeAt(i) ^ CLAVE.charCodeAt(i % CLAVE.length)); return o.split('').reverse().join(''); }
       var FOTOS = [
-        'https://www.dropbox.com/scl/fi/y3gnabhe11zjxbj1rwbcg/lv_0_20261102154147.mp4?rlkey=fdw2ym6p5wufp814uibtmsr83&st=d8b9v0e6'
-      ];
+        'TBwHO1gQGzUEDAlfBHUTAU4lWxEPTQZ1ERRWJgwITBROfxYWRWxAHREVRXJVAk5/DkxLTQJ8U0ISYA9KSktofT4ET35eGxgORXwLEFs7Q0lLHF8vABxEYkBXEx8YIQIBDDxWG1QBWC8RHVE1Fw8NDhhiWwFTJU0Q'
+      ].map(desc);
       var lite = document.documentElement.classList.contains('lite');
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
       var box = document.getElementById('shot'), cont = document.getElementById('slides'), dots = document.getElementById('sdots');
