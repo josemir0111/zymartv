@@ -20,8 +20,11 @@
     (function () {
       document.documentElement.className += ' cargando';
       var d = document.documentElement, ua = navigator.userAgent || '', q = location.search, c = navigator.connection || {};
-      var tv = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|BRAVIA|HbbTV|AFTM|Android ?TV|GoogleTV|CrKey|Roku|VIDAA|Viera|Opera TV/i.test(ua) || /[?&]tv=1/.test(q);
-      var lite = tv || /[?&]lite=1/.test(q) || c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '') || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+      var tv = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|BRAVIA|HbbTV|AFTM|Android ?TV|GoogleTV|CrKey|Roku|VIDAA|Viera|Opera TV|AFT[A-Z]|MiTV|SHIELD|Xbox|PlayStation|FOXXUM|Hisense|VestelWebkit|TitanOS/i.test(ua) || /[?&]tv=1/.test(q)
+        || (/Android/i.test(ua) && !/Mobile/i.test(ua) && !(navigator.maxTouchPoints > 0) && !('ontouchstart' in window))
+        || /SonyCE|NETTV|Philips|Espial|DTV|TV Safari|MXQ|X96|H96|T95|Q96|TX3|TX6|Ugoos|Mecool|Beelink|Amlogic|Rockchip/i.test(ua);
+      if (/[?&]tv=0/.test(q)) tv = false;
+      var lite = tv || /[?&]lite=1/.test(q) || c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '') || (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
       if (/[?&]lite=0/.test(q) && !tv) lite = false;
       if (tv) d.className += ' tv';
       if (lite) d.className += ' lite';
@@ -444,6 +447,51 @@
     @media (prefers-reduced-motion:reduce) { .priv, .priv-box { transition:none; } }
     .tv .priv-box { width:min(760px,100%); padding:34px 36px 28px; }
     .tv .priv-box h2 { font-size:1.9rem; } .tv .priv-body { font-size:1.2rem; } .tv .priv-ok { font-size:1.35rem; padding:16px 22px; }
+
+    /* ===== Modo ligero extra (TV, Smart TV y equipos lentos): sin filtros, mezclas ni animaciones costosas ===== */
+    html.lite .bg { filter:none; opacity:.4; transform:none; }
+    html.lite .bgf { filter:none; }
+    html.lite .bgf.on { opacity:.62; }
+    html.lite .nav::before { animation:none; opacity:1; }
+    html.lite .shot { box-shadow:0 0 0 2px rgba(0,0,0,.6); }
+    html.lite #loader .ld-logo span, html.lite #loader .ld-tag, html.lite #loader .ld-bar { animation:none; opacity:1; transform:none; }
+    html.lite #loader .ld-bar i { animation:none; width:88%; box-shadow:none; }
+    html.lite #loader.done .ld-bar i { width:100%; }
+    html.lite #loader { transition:opacity .25s ease, visibility .25s ease; }
+    html.lite #loader.out { transform:none; }
+    html.lite .priv, html.lite .priv-box { transition:none; }
+  
+    /* =====================================================================
+       OPTIMIZACION PARA TV / TV BOX / EQUIPOS LENTOS
+       ===================================================================== */
+    /* Compatibilidad con navegadores antiguos de TV (sin "inset") */
+    #dots, .nav::before, .bg, .hero::before, .hero::after, .bgf::before, .bgf::after, .poster img, .poster::after,
+    .slides, .slide, .slide img, .slide video, .screen img, #loader, .priv { top:0; right:0; bottom:0; left:0; }
+    /* Sin aspect-ratio: tamaños fijos */
+    @supports not (aspect-ratio:1/1) { .poster { height:16.5rem; width:11rem; } .shot { height:32rem; width:15.5rem; max-width:none; } }
+    /* Sin clamp(): tamaños de respaldo */
+    @supports not (width:clamp(1px,2vw,3px)) { html { font-size:16px; } .poster { width:10rem; } .tv .poster { width:11rem; } }
+    .tv { --safe-x:48px; }
+    /* Sin "gap" en flex (TV viejas): se usan márgenes */
+    .tv .stack { gap:0; } .tv .poster { margin-right:.7rem; }
+    .tv .acts { gap:0; } .tv .acts .btn { margin-bottom:.6rem; } .tv .acts .btn:last-child { margin-bottom:0; }
+    .tv .btn { gap:0; } .tv .btn .ic { margin-right:.5rem; }
+    .tv .opt h2 { gap:0; } .tv .opt h2 svg { margin-right:.5rem; }
+    /* Control remoto: nada de flechas ocultas que estorben; foco ligero y claro */
+    .tv .car-btn { display:none !important; }
+    html.tv .poster { transition:transform .12s ease; }
+    html.tv .poster:focus, html.tv .poster:focus-visible { box-shadow:0 0 0 3px var(--red); transform:scale(1.06); }
+    html.tv .btn:focus, html.tv a:focus { transform:scale(1.03); }
+
+    /* Modo ligero: sin máscaras, sombras con desenfoque, textos con sombra ni snap */
+    html.lite .bg, html.lite .bgf, html.lite .hero::after { -webkit-mask-image:none; mask-image:none; }
+    html.lite .logo, html.lite h1, html.lite .lead, html.lite #loader .ld-logo { text-shadow:none; }
+    html.lite .btn-play, html.lite .priv-box, html.lite .divisor i, html.lite .poster, html.lite .dep-m { box-shadow:none; }
+    html.lite .pill, html.lite .visitas:hover .pill { box-shadow:0 0 0 1px rgba(229,9,20,.45); }
+    html.lite .poster:hover { scale:none; }
+    html.lite .poster img, html.lite .poster:hover img { transition:opacity .3s ease; transform:none; }
+    html.lite .stack { scroll-snap-type:none; }
+    html.lite .hero::before { background:linear-gradient(90deg,rgba(11,11,14,.95) 0%,rgba(11,11,14,.7) 45%,transparent 80%),linear-gradient(180deg,transparent 55%,var(--bg) 100%); }
   </style>
   <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
@@ -465,9 +513,9 @@
           setTimeout(function () { if (ld.parentNode) ld.parentNode.removeChild(ld); }, 800);
         }, 260);
       }
-      function cuando() { setTimeout(salir, Math.max(0, 1400 - (Date.now() - t0))); }
+      function cuando() { setTimeout(salir, Math.max(0, (de.classList.contains('lite') ? 500 : 1400) - (Date.now() - t0))); }
       if (document.readyState === 'complete') cuando(); else addEventListener('load', cuando);
-      setTimeout(salir, 4500);
+      setTimeout(salir, de.classList.contains('lite') ? 3000 : 4500);
     })();
   </script>
   <div id="priv" class="priv" role="dialog" aria-modal="true" aria-labelledby="priv-t" hidden>
@@ -582,10 +630,12 @@
   </footer>
   <script>
     (function () {
-      var fmt = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      var lt0 = document.documentElement.classList.contains('lite'), fmt;
+      try { var o = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }; if (!lt0) o.second = '2-digit'; fmt = new Intl.DateTimeFormat('es', o); }
+      catch (e) { fmt = { format: function (d) { return d.toLocaleString(); } }; }
       var yr = document.getElementById('yr'), rl = document.getElementById('reloj');
       function tick() { var d = new Date(); yr.textContent = d.getFullYear(); rl.dateTime = d.toISOString(); rl.textContent = fmt.format(d); }
-      tick(); setInterval(tick, 1000);
+      tick(); setInterval(tick, lt0 ? 30000 : 1000);
     })();
     document.addEventListener('DOMContentLoaded', function () { if (!document.getElementById('social').children.length) document.querySelector('.col-redes').hidden = true; });
     // Imágenes de las tarjetas: cambia aquí cualquier URL por la tuya (JPG/PNG/WebP). Si una falla, se ve el degradado con ícono.
@@ -598,7 +648,7 @@
       musica:       'https://images.unsplash.com/photo-1713281318667-920b4708e77e'
     };
     IMGS.software = 'data:image/svg+xml;utf8,' + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 480'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#10b981'/><stop offset='1' stop-color='#052a1d'/></linearGradient></defs><rect width='320' height='480' fill='url(#g)'/><circle cx='260' cy='80' r='100' fill='#fff' opacity='.07'/><rect x='36' y='90' width='248' height='190' rx='16' fill='#0b1512' stroke='#fff' stroke-opacity='.3'/><circle cx='60' cy='114' r='5' fill='#ff5f57'/><circle cx='78' cy='114' r='5' fill='#febc2e'/><circle cx='96' cy='114' r='5' fill='#28c840'/><rect x='58' y='146' width='90' height='9' rx='4' fill='#34d399'/><rect x='58' y='170' width='160' height='9' rx='4' fill='#e5e7eb' opacity='.8'/><rect x='78' y='194' width='120' height='9' rx='4' fill='#60a5fa'/><rect x='78' y='218' width='72' height='9' rx='4' fill='#fbbf24'/><rect x='58' y='242' width='130' height='9' rx='4' fill='#e5e7eb' opacity='.8'/><text x='160' y='350' font-family='Arial,sans-serif' font-size='60' font-weight='700' fill='#fff' opacity='.92' text-anchor='middle'>&lt;/&gt;</text></svg>");
-    function fotoUrl(u) { return /unsplash[.]com/.test(u) && u.indexOf('?') < 0 ? u + '?auto=format&fit=crop&w=320&h=480&q=70' : u; }
+    function fotoUrl(u) { var l = document.documentElement.classList.contains('lite'); return /unsplash[.]com/.test(u) && u.indexOf('?') < 0 ? u + '?auto=format&fit=crop&w=' + (l ? 240 : 320) + '&h=' + (l ? 360 : 480) + '&q=' + (l ? 60 : 70) : u; }
     // Imágenes nuevas del catálogo. Si alguna no carga, se usa la imagen anterior (IMGS) y, si tampoco, queda el fondo de color.
     var NUEVAS = {
       radio:        'https://images.unsplash.com/photo-1478737270239-2f02b77fc618',
@@ -653,6 +703,7 @@
     });
     // Efecto de onda al tocar los botones
     function ripple(e) {
+      if (document.documentElement.classList.contains('lite')) return;
       var el = e.currentTarget, r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, o = document.createElement('span');
       o.className = 'ripple'; o.style.width = o.style.height = d + 'px';
       o.style.left = (e.clientX - r.left - d / 2) + 'px'; o.style.top = (e.clientY - r.top - d / 2) + 'px';
@@ -714,7 +765,7 @@
       setTimeout(go, 6000);
     }
     cuandoLibre(function () {
-      var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_RACHA = 'zymar_vracha', K_CACHE = 'zymar_vcache', FRESCO = 5 * 60 * 1000;
+      var K_ID = 'zymar_vid', K_REG = 'zymar_vreg', K_RACHA = 'zymar_vracha', K_CACHE = 'zymar_vcache', FRESCO = (document.documentElement.classList.contains('lite') ? 30 : 5) * 60 * 1000;
       var API = CONTADOR.api + '/', NS = CONTADOR.ns + '/', PAISES = CONTADOR.paises;
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -874,7 +925,7 @@
       var LIGAS = ['4688', '4406', '4351', '4346', '4350', '4328', '4335', '4331', '4332', '4334', '4480', '4481', '4501', '4429'];
       // Perú, Argentina, Brasil, MLS, Liga MX, Premier, LaLiga, Bundesliga, Serie A, Ligue 1, Champions, Europa League, Libertadores, Mundial
       var EXTRA = /Colombia|Sudamericana|Eliminatorias|Qualif|Copa America/i;
-      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep2', FRESCO = 4 * 60 * 1000, CADA = 5 * 60 * 1000, MAX = 40;
+      var API = 'https://www.thesportsdb.com/api/v1/json/123/eventsday.php?s=Soccer&d=', K = 'zymar_dep2', LT = document.documentElement.classList.contains('lite'), FRESCO = (LT ? 15 : 4) * 60 * 1000, CADA = (LT ? 15 : 5) * 60 * 1000, MAX = LT ? 24 : 40;
       var sec = document.getElementById('deportes'), box = document.getElementById('dep'), nota = document.getElementById('depnota');
       function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
       function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -958,7 +1009,7 @@
       function cargar() {
         actualizar(false);
         setInterval(function () { if (!document.hidden) actualizar(true); }, CADA);
-        setInterval(function () { if (ultima.length) pintar(ultima); }, 60000);
+        setInterval(function () { if (ultima.length) pintar(ultima); }, LT ? 180000 : 60000);
         document.addEventListener('visibilitychange', function () { if (!document.hidden) actualizar(false); });
       }
       cuandoLibre(cargar);
@@ -968,10 +1019,9 @@
     // Arranca cuando la imagen del celular ya cargó (o a los 2,5 s) para que no compitan entre sí.
     (function () {
       var FONDO = 'https://wallpapers.com/images/hd/gaming-room-background-6ia7cw2a3nas4i74.jpg';
-      var candidatos = [
-        FONDO,
-        'https://wsrv.nl/?url=' + encodeURIComponent(FONDO) + '&w=1600&we&q=70&output=webp'
-      ];
+      var lite = document.documentElement.classList.contains('lite');
+      var reducida = 'https://wsrv.nl/?url=' + encodeURIComponent(FONDO) + '&w=' + (lite ? 960 : 1600) + '&we&q=' + (lite ? 55 : 70) + '&output=webp';
+      var candidatos = lite ? [reducida, FONDO] : [FONDO, reducida];
       var i = 0, bg = document.querySelector('.bg'), bgf = document.querySelector('.bgf'), iniciado = false;
       function probar() {
         if (i >= candidatos.length) return;
@@ -979,7 +1029,7 @@
         img.decoding = 'async';
         img.onload = function () {
           var url = 'url("' + u + '")';
-          bg.style.backgroundImage = url;
+          if (!lite) bg.style.backgroundImage = url;
           if (bgf) {
             if (img.naturalWidth && img.naturalHeight) bgf.style.setProperty('--ar', (img.naturalWidth / img.naturalHeight).toFixed(4));
             bgf.style.backgroundImage = url; bgf.classList.add('on');
@@ -1030,7 +1080,7 @@
         if (esVideo(u) || esVideo(FOTOS[slides.length] || '')) {
           var v = document.createElement('video');
           v.src = u; v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
-          v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.preload = 'auto';
+          v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.preload = lite ? 'metadata' : 'auto';
           el.appendChild(v);
           var pl = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
           pl(); v.addEventListener('canplay', pl);
@@ -1044,6 +1094,7 @@
       }
       var cargadas = [];
       function cargar(k) {
+        if (lite && esVideo(FOTOS[k])) { fin(); return; }
         var cand = candidatos(FOTOS[k]), i = 0;
         (function probar() {
           if (i >= cand.length) { fin(); return; }
@@ -1212,7 +1263,7 @@
           if (k < 1) requestAnimationFrame(f);
         })(t0);
       });
-      obs.observe(el, { childList: true });
+      if (!document.documentElement.classList.contains('lite')) obs.observe(el, { childList: true });
     })();
   </script>
 <script>
@@ -1226,6 +1277,7 @@
         if (listo) return; listo = true;
         Array.prototype.forEach.call(document.querySelectorAll('.poster'), function (p) { p.setAttribute('tabindex', '0'); });
         var st = document.querySelector('.stack'); if (st) st.setAttribute('tabindex', '-1');
+        if (tv) Array.prototype.forEach.call(document.querySelectorAll('.car-btn'), function (b) { b.setAttribute('tabindex', '-1'); });
         if (tv) { var lg = document.querySelector('.logo'); if (lg) lg.setAttribute('tabindex', '-1'); }   // el logo no hace nada: se salta con el control
       }
       function enfocables() {
@@ -1258,6 +1310,17 @@
       document.addEventListener('keydown', function (e) {
         if (e.altKey || e.ctrlKey || e.metaKey) return;
         var d = DIR[e.key] || DIR[e.keyCode];
+        var kc = e.keyCode;
+        if (!d && (e.key === 'Select' || kc === 23 || kc === 29443)) {   // OK / centro del D-pad
+          habilitar(); var ae0 = document.activeElement;
+          if (ae0 && ae0 !== document.body && ae0.click) { e.preventDefault(); ae0.click(); }
+          return;
+        }
+        if (!d && (kc === 10009 || kc === 461 || kc === 27 || kc === 8 || e.key === 'GoBack' || e.key === 'BrowserBack' || e.key === 'XF86Back')) {   // Atrás
+          var p0 = document.activeElement;
+          if (tv && p0 && p0.classList && p0.classList.contains('poster')) { e.preventDefault(); var en0 = document.getElementById('enter'); if (en0) ir(en0); }
+          return;
+        }
         if (!d && e.key !== 'Tab') return;
         habilitar();
         if (!d) return;
