@@ -536,8 +536,21 @@
     // Política de privacidad: se muestra una sola vez, después de la pantalla de carga. El usuario solo puede aceptar.
     (function () {
       var K = 'zymar_priv', p = document.getElementById('priv'), ok = document.getElementById('privOk'), de = document.documentElement, abierto = false;
-      function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function ckGet(k) { var m = document.cookie.match(new RegExp('(?:^|; )' + k + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : null; }
+      function ckSet(k, v) { try { document.cookie = k + '=' + encodeURIComponent(v) + '; max-age=31536000; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : ''); } catch (e) {} }
+      // Se guarda en 3 lugares (localStorage, cookie y sessionStorage); basta con que uno funcione para no volver a mostrarla
+      function lsGet(k) {
+        var v = null;
+        try { v = localStorage.getItem(k); } catch (e) {}
+        if (!v) { try { v = ckGet(k); } catch (e) {} }
+        if (!v) { try { v = sessionStorage.getItem(k); } catch (e) {} }
+        return v;
+      }
+      function lsSet(k, v) {
+        try { localStorage.setItem(k, v); } catch (e) {}
+        ckSet(k, v);
+        try { sessionStorage.setItem(k, v); } catch (e) {}
+      }
       function fondo(on) {
         Array.prototype.forEach.call(document.querySelectorAll('header.nav, main'), function (el) {
           if (on) el.setAttribute('inert', ''); else el.removeAttribute('inert');
