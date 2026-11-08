@@ -492,6 +492,20 @@
     html.lite .poster img, html.lite .poster:hover img { transition:opacity .3s ease; transform:none; }
     html.lite .stack { scroll-snap-type:none; }
     html.lite .hero::before { background:linear-gradient(90deg,rgba(11,11,14,.95) 0%,rgba(11,11,14,.7) 45%,transparent 80%),linear-gradient(180deg,transparent 55%,var(--bg) 100%); }
+
+    /* Política de privacidad: el texto se ajusta a cualquier pantalla */
+    .priv { padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px)); }
+    .priv-box { width:100%; max-width:34rem; max-height:92vh; max-height:92svh; overflow:hidden; }
+    .priv-box h2 { flex:none; font-size:1.2rem; }
+    .priv-body { flex:1 1 auto; min-height:0; font-size:.9rem; font-size:clamp(.82rem,.78rem + .3vw,1rem); line-height:1.5; overflow-wrap:break-word; word-wrap:break-word; text-align:left; }
+    .priv-body p { margin:0 0 .7em; }
+    .priv-ok { flex:none; }
+    @media (max-height:520px) { .priv-box { padding:14px 16px 12px; } .priv-box h2 { font-size:1rem; } .priv-box h2::before { margin-bottom:6px; } .priv-body { font-size:.78rem; line-height:1.4; margin:4px 0 10px; } .priv-ok { padding:9px 14px; font-size:.9rem; } }
+    @media (max-width:360px) { .priv-box { padding:18px 14px 14px; } }
+    .tv .priv-box { max-width:min(56rem,94vw); padding:1.6rem 2rem 1.4rem; }
+    .tv .priv-box h2 { font-size:1.5rem; }
+    .tv .priv-body { font-size:.95rem; line-height:1.45; }
+    .tv .priv-ok { font-size:1.15rem; padding:.8rem 1.2rem; }
   </style>
   <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
@@ -574,6 +588,9 @@
         if (!abierto) return;
         if (e.key === 'Tab' || e.key === 'Escape' || /^Arrow|^(Left|Right|Up|Down)$/.test(e.key) || (e.keyCode >= 37 && e.keyCode <= 40)) {
           e.preventDefault(); e.stopImmediatePropagation(); ok.focus();
+          // Flechas arriba/abajo del control: desplazan el texto si no cabe completo
+          var up = e.key === 'ArrowUp' || e.key === 'Up' || e.keyCode === 38, dn = e.key === 'ArrowDown' || e.key === 'Down' || e.keyCode === 40;
+          if (up || dn) { var cuerpo = p.querySelector('.priv-body'); if (cuerpo) cuerpo.scrollTop += (dn ? 1 : -1) * Math.max(60, cuerpo.clientHeight * 0.6); }
         }
       }, true);
     })();
@@ -661,7 +678,7 @@
       musica:       'https://images.unsplash.com/photo-1713281318667-920b4708e77e'
     };
     IMGS.software = 'data:image/svg+xml;utf8,' + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 480'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#10b981'/><stop offset='1' stop-color='#052a1d'/></linearGradient></defs><rect width='320' height='480' fill='url(#g)'/><circle cx='260' cy='80' r='100' fill='#fff' opacity='.07'/><rect x='36' y='90' width='248' height='190' rx='16' fill='#0b1512' stroke='#fff' stroke-opacity='.3'/><circle cx='60' cy='114' r='5' fill='#ff5f57'/><circle cx='78' cy='114' r='5' fill='#febc2e'/><circle cx='96' cy='114' r='5' fill='#28c840'/><rect x='58' y='146' width='90' height='9' rx='4' fill='#34d399'/><rect x='58' y='170' width='160' height='9' rx='4' fill='#e5e7eb' opacity='.8'/><rect x='78' y='194' width='120' height='9' rx='4' fill='#60a5fa'/><rect x='78' y='218' width='72' height='9' rx='4' fill='#fbbf24'/><rect x='58' y='242' width='130' height='9' rx='4' fill='#e5e7eb' opacity='.8'/><text x='160' y='350' font-family='Arial,sans-serif' font-size='60' font-weight='700' fill='#fff' opacity='.92' text-anchor='middle'>&lt;/&gt;</text></svg>");
-    function fotoUrl(u) { var l = document.documentElement.classList.contains('lite'); return /unsplash[.]com/.test(u) && u.indexOf('?') < 0 ? u + '?auto=format&fit=crop&w=' + (l ? 240 : 320) + '&h=' + (l ? 360 : 480) + '&q=' + (l ? 60 : 70) : u; }
+    function fotoUrl(u) { var l = document.documentElement.classList.contains('lite'); return /unsplash[.]com/.test(u) && u.indexOf('?') < 0 ? u + '?auto=format&fit=crop&w=' + (l ? 280 : 320) + '&h=' + (l ? 420 : 480) + '&q=' + (l ? 65 : 70) : u; }
     // Imágenes nuevas del catálogo. Si alguna no carga, se usa la imagen anterior (IMGS) y, si tampoco, queda el fondo de color.
     var NUEVAS = {
       radio:        'https://images.unsplash.com/photo-1478737270239-2f02b77fc618',
@@ -671,15 +688,33 @@
       software:     'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
       musica:       'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'
     };
-    Array.prototype.forEach.call(document.querySelectorAll('.poster[data-img]'), function (p) {
-      var k = p.getAttribute('data-img'), cand = [NUEVAS[k], IMGS[k]].filter(Boolean), i = 0;
+    var LITE = document.documentElement.classList.contains('lite'), TVM = document.documentElement.classList.contains('tv');
+    // Cada tarjeta prueba varias fuentes en orden (directa, copia por wsrv.nl, imagen anterior). Si una tarda más de 7 s o falla, pasa a la siguiente.
+    function fuentes(base) {
+      var d = fotoUrl(base), out = [d];
+      if (/^https?:/.test(d)) {
+        var w = LITE ? 280 : 360;
+        out.push('https://wsrv.nl/?url=' + encodeURIComponent(base) + '&w=' + w + '&h=' + Math.round(w * 1.5) + '&fit=cover&q=65&output=jpg');
+      }
+      return out;
+    }
+    function cargarTarjeta(p) {
+      var k = p.getAttribute('data-img'), cand = [], i = 0;
+      [NUEVAS[k], IMGS[k]].forEach(function (u) { if (u) cand = cand.concat(fuentes(u)); });
       (function probar() {
         if (i >= cand.length) return;
-        var im = new Image(); im.alt = ''; im.decoding = 'async';
-        im.onload = function () { p.insertBefore(im, p.firstChild); p.classList.add('has-img'); };
-        im.onerror = probar;
-        im.src = fotoUrl(cand[i++]);
+        var im = new Image(), fin = false, t;
+        im.alt = ''; im.decoding = 'async';
+        function siguiente() { if (fin) return; fin = true; clearTimeout(t); im.onload = im.onerror = null; probar(); }
+        im.onload = function () { if (fin) return; fin = true; clearTimeout(t); p.insertBefore(im, p.firstChild); p.classList.add('has-img'); };
+        im.onerror = siguiente;
+        t = setTimeout(siguiente, 7000);
+        im.src = cand[i++];
       })();
+    }
+    // En modo ligero se cargan de una en una (cada 250 ms) para no saturar la conexión ni la memoria de la TV
+    Array.prototype.forEach.call(document.querySelectorAll('.poster[data-img]'), function (p, n) {
+      if (LITE) setTimeout(function () { cargarTarjeta(p); }, 250 * n); else cargarTarjeta(p);
     });
   </script>
   <script>
