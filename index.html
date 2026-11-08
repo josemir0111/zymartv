@@ -425,7 +425,7 @@
     .tv .lead { font-size:1.2rem; } .tv .opt p { font-size:.95rem; } .tv .opt h2 { font-size:1.05rem; }
 
     /* ===== Política de privacidad (aparece después del loader; el usuario solo acepta) ===== */
-    html.priv, html.priv body { overflow:hidden; }
+    html.priv-open, html.priv-open body { overflow:hidden; }
     .priv { position:fixed; inset:0; z-index:900; display:flex; align-items:center; justify-content:center; padding:18px;
       background:rgba(5,5,8,.82); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); opacity:0; transition:opacity .35s ease; }
     .priv[hidden] { display:none; }
@@ -498,13 +498,13 @@
       function cerrar() {
         if (!abierto) return; abierto = false;
         lsSet(K, '1');
-        p.classList.remove('on'); fondo(false); de.classList.remove('priv');
+        p.classList.remove('on'); fondo(false); de.classList.remove('priv-open');
         setTimeout(function () { p.hidden = true; }, 380);
         if (de.classList.contains('tv')) { var en = document.getElementById('enter'); if (en) { try { en.focus({ preventScroll: true }); } catch (e) { en.focus(); } } }
       }
       window.zPriv = function () {
         if (abierto || lsGet(K) === '1') return;
-        abierto = true; p.hidden = false; de.classList.add('priv'); fondo(true);
+        abierto = true; p.hidden = false; de.classList.add('priv-open'); fondo(true);
         requestAnimationFrame(function () { p.classList.add('on'); try { ok.focus({ preventScroll: true }); } catch (e) { ok.focus(); } });
       };
       ok.addEventListener('click', cerrar);
