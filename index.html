@@ -503,7 +503,7 @@
         if (de.classList.contains('tv')) { var en = document.getElementById('enter'); if (en) { try { en.focus({ preventScroll: true }); } catch (e) { en.focus(); } } }
       }
       window.zPriv = function () {
-        if (abierto || lsGet(K) === '1') return;
+        if (abierto || (lsGet(K) === '1' && !/[?&]priv=1/.test(location.search))) return;   // con ?priv=1 se muestra siempre (para probarla)
         abierto = true; p.hidden = false; de.classList.add('priv-open'); fondo(true);
         requestAnimationFrame(function () { p.classList.add('on'); try { ok.focus({ preventScroll: true }); } catch (e) { ok.focus(); } });
       };
