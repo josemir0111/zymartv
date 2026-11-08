@@ -423,6 +423,27 @@
     /* --- TV --- */
     .tv .poster { width:clamp(10rem, 12vw, 15rem); }
     .tv .lead { font-size:1.2rem; } .tv .opt p { font-size:.95rem; } .tv .opt h2 { font-size:1.05rem; }
+
+    /* ===== Política de privacidad (aparece después del loader; el usuario solo acepta) ===== */
+    html.priv, html.priv body { overflow:hidden; }
+    .priv { position:fixed; inset:0; z-index:900; display:flex; align-items:center; justify-content:center; padding:18px;
+      background:rgba(5,5,8,.82); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); opacity:0; transition:opacity .35s ease; }
+    .priv[hidden] { display:none; }
+    .priv.on { opacity:1; }
+    .priv-box { width:min(520px,100%); max-height:min(88vh,720px); display:flex; flex-direction:column; border-radius:14px; padding:24px 22px 20px;
+      background:linear-gradient(180deg,#17171d,#0f0f14); border:1px solid rgba(255,255,255,.1); box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(229,9,20,.18);
+      transform:translateY(14px) scale(.98); transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+    .priv.on .priv-box { transform:none; }
+    .priv-box h2 { margin:0 0 6px; font-size:1.35rem; font-weight:800; letter-spacing:.01em; }
+    .priv-box h2::before { content:""; display:block; width:38px; height:4px; border-radius:99px; margin-bottom:12px; background:linear-gradient(90deg,var(--red),var(--red-soft)); }
+    .priv-body { overflow:auto; -webkit-overflow-scrolling:touch; margin:8px 0 18px; padding-right:4px; color:var(--muted); font-size:.93rem; line-height:1.55; }
+    .priv-body p { margin:0 0 12px; }
+    .priv-body b { color:#fff; font-weight:700; }
+    .priv-ok { width:100%; justify-content:center; display:inline-flex; align-items:center; padding:13px 18px; font-size:1rem; font-weight:800; }
+    html.lite .priv { -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(5,5,8,.94); }
+    @media (prefers-reduced-motion:reduce) { .priv, .priv-box { transition:none; } }
+    .tv .priv-box { width:min(760px,100%); padding:34px 36px 28px; }
+    .tv .priv-box h2 { font-size:1.9rem; } .tv .priv-body { font-size:1.2rem; } .tv .priv-ok { font-size:1.35rem; padding:16px 22px; }
   </style>
   <noscript><style>#loader{display:none!important}html.cargando,html.cargando body{overflow:auto!important}</style></noscript>
 </head>
@@ -440,13 +461,60 @@
         if (listo) return; listo = true;
         ld.classList.add('done');
         setTimeout(function () {
-          ld.classList.add('out'); de.classList.remove('cargando');
+          ld.classList.add('out'); de.classList.remove('cargando'); if (window.zPriv) window.zPriv();
           setTimeout(function () { if (ld.parentNode) ld.parentNode.removeChild(ld); }, 800);
         }, 260);
       }
       function cuando() { setTimeout(salir, Math.max(0, 1400 - (Date.now() - t0))); }
       if (document.readyState === 'complete') cuando(); else addEventListener('load', cuando);
       setTimeout(salir, 4500);
+    })();
+  </script>
+  <div id="priv" class="priv" role="dialog" aria-modal="true" aria-labelledby="priv-t" hidden>
+    <div class="priv-box">
+      <h2 id="priv-t">Política de privacidad</h2>
+      <div class="priv-body">
+        <p>Bienvenido a <b>Zymar</b>. Antes de continuar, te explicamos de forma clara cómo funciona el servicio.</p>
+        <p><b>Radio y televisión.</b> Las direcciones (URL) de las emisoras de radio y de los canales de televisión provienen de internet. Son transmisiones públicas de terceros: Zymar no las aloja ni es propietario de ellas, solo te facilita el acceso.</p>
+        <p><b>Música y remix.</b> Los remix que encuentras aquí pertenecen a <b>Aadrois Music</b>.</p>
+        <p><b>Tus datos.</b> No te pedimos nombre, correo, teléfono ni contraseña. Para mostrar el contador de visitantes se usa tu país aproximado, y en tu dispositivo se guardan solo ajustes básicos, como esta aceptación.</p>
+        <p><b>Enlaces de terceros.</b> Al abrir una emisora, un canal, una descarga u otro enlace externo, ese sitio aplica su propia política de privacidad.</p>
+        <p>Al pulsar <b>Aceptar</b> confirmas que leíste esta información y que estás de acuerdo.</p>
+      </div>
+      <button class="btn btn-play priv-ok" id="privOk" type="button">Aceptar</button>
+    </div>
+  </div>
+  <script>
+    // Política de privacidad: se muestra una sola vez, después de la pantalla de carga. El usuario solo puede aceptar.
+    (function () {
+      var K = 'zymar_priv', p = document.getElementById('priv'), ok = document.getElementById('privOk'), de = document.documentElement, abierto = false;
+      function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function fondo(on) {
+        Array.prototype.forEach.call(document.querySelectorAll('header.nav, main'), function (el) {
+          if (on) el.setAttribute('inert', ''); else el.removeAttribute('inert');
+        });
+      }
+      function cerrar() {
+        if (!abierto) return; abierto = false;
+        lsSet(K, '1');
+        p.classList.remove('on'); fondo(false); de.classList.remove('priv');
+        setTimeout(function () { p.hidden = true; }, 380);
+        if (de.classList.contains('tv')) { var en = document.getElementById('enter'); if (en) { try { en.focus({ preventScroll: true }); } catch (e) { en.focus(); } } }
+      }
+      window.zPriv = function () {
+        if (abierto || lsGet(K) === '1') return;
+        abierto = true; p.hidden = false; de.classList.add('priv'); fondo(true);
+        requestAnimationFrame(function () { p.classList.add('on'); try { ok.focus({ preventScroll: true }); } catch (e) { ok.focus(); } });
+      };
+      ok.addEventListener('click', cerrar);
+      // Mientras está abierto, el foco se queda en "Aceptar" (también con el control de la TV)
+      document.addEventListener('keydown', function (e) {
+        if (!abierto) return;
+        if (e.key === 'Tab' || e.key === 'Escape' || /^Arrow|^(Left|Right|Up|Down)$/.test(e.key) || (e.keyCode >= 37 && e.keyCode <= 40)) {
+          e.preventDefault(); e.stopImmediatePropagation(); ok.focus();
+        }
+      }, true);
     })();
   </script>
   <canvas id="dots" aria-hidden="true"></canvas>
